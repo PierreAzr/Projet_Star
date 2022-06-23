@@ -10,7 +10,7 @@
 
     <form method="get" action="{{ route('relation_entreprise_index') }}">
         <label for="start">Start date:</label>
-    <input type="date" id="start" name="date" value={{ $date }}>
+    <input type="date" id="start" name="date" value= "{{ $date }}">
   <p><button>Submit</button></p>
     </form>
 

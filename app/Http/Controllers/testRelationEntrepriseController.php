@@ -66,6 +66,108 @@ class testRelationEntrepriseController extends Controller
         }
         // Fin calcul Periode
 
+
+
+
+        // /r/v1/formation-longue/prospects-with-events/@codeTypeEvt/@codeEtapeEvt/@dateDebut/@dateFin/@evtClotures
+        $url = "https://citeformations.ymag.cloud/index.php/r/v1/formation-longue/prospects-with-events/4/8/30-08-2021/28-08-2022/0";
+        $api_data_pr_recu = $this->ApiCall($url);  
+        echo("periode 2021-2022 contrat recu");
+        //dump($api_data_pr_recu);
+        foreach ($api_data_pr_recu as $prospect) {
+                $prospects_tab_recu[$prospect["codeApprenant"]] = array(
+                    "codeApprenant" => $prospect["codeApprenant"]
+                );
+        
+        }
+        $url = "https://citeformations.ymag.cloud/index.php/r/v1/formation-longue/prospects-with-events/4/151/30-08-2021/28-08-2022/0";
+        $api_data_pr_reception = $this->ApiCall($url);  
+        echo("periode 2021-2022 reception pre contrat");
+        //dump($api_data_pr_reception);
+        foreach ($api_data_pr_reception as $prospect) {
+            $prospects_tab_reception[$prospect["codeApprenant"]] = array(
+                "codeApprenant" => $prospect["codeApprenant"]
+            );
+        }
+    
+        $url = "https://citeformations.ymag.cloud/index.php/r/v1/formation-longue/prospects-with-events/4/149/30-08-2021/28-08-2022/0";
+        $api_data_pr_envoi = $this->ApiCall($url);  
+        echo("periode 2021-2022 envoi pre contrat");
+       // dump($api_data_pr_envoi);   
+        foreach ($api_data_pr_envoi as $prospect) {
+            $prospects_tab_envoi[$prospect["codeApprenant"]] = array(
+                "codeApprenant" => $prospect["codeApprenant"]
+            );
+        }
+
+        $url = "https://citeformations.ymag.cloud/index.php/r/v1/formation-longue/prospects-with-events?codesPeriode=15";
+        $api_data_prospects_15 = $this->ApiCall($url);
+        echo("prospect periode 15");
+        //dump($api_data_prospects_15);
+        $url = "https://citeformations.ymag.cloud/index.php/r/v1/formation-longue/prospects-with-events";
+        $api_data_prospects_11 = $this->ApiCall($url);
+        echo("prospect periode 11");
+        //dump($api_data_prospects_11);
+
+        foreach ($api_data_prospects_15 as $prospect) {
+
+            if (!empty($prospects_tab_recu[$prospect["codeApprenant"]])) {     
+                $prospects_tab_recu_15[$prospect["codeApprenant"]] = array(
+                    "codeApprenant" => $prospect["codeApprenant"]
+                );
+            }
+
+            if (!empty($prospects_tab_reception[$prospect["codeApprenant"]])) {     
+                $prospects_tab_reception_15[$prospect["codeApprenant"]] = array(
+                    "codeApprenant" => $prospect["codeApprenant"]
+                );
+            }
+
+            if (!empty($prospects_tab_envoi[$prospect["codeApprenant"]])) {     
+                $prospects_tab_envoi_15[$prospect["codeApprenant"]] = array(
+                    "codeApprenant" => $prospect["codeApprenant"]
+                );
+            }
+        }
+        echo("prospect periode 15 recu");
+        dump($prospects_tab_recu_15);
+        echo("prospect periode 15 reception");
+        dump($prospects_tab_reception_15);
+        echo("prospect periode 15 envoi");
+        dump($prospects_tab_envoi_15);
+
+        foreach ($api_data_prospects_11 as $prospect) {
+
+            if (!empty($prospects_tab_recu[$prospect["codeApprenant"]])) {     
+                $prospects_tab_recu_11[$prospect["codeApprenant"]] = array(
+                    "codeApprenant" => $prospect["codeApprenant"]
+                );
+            }
+
+            if (!empty($prospects_tab_reception[$prospect["codeApprenant"]])) {     
+                $prospects_tab_reception_11[$prospect["codeApprenant"]] = array(
+                    "codeApprenant" => $prospect["codeApprenant"]
+                );
+            }
+
+            if (!empty($prospects_tab_envoi[$prospect["codeApprenant"]])) {     
+                $prospects_tab_envoi_11[$prospect["codeApprenant"]] = array(
+                    "codeApprenant" => $prospect["codeApprenant"]
+                );
+            }
+        }
+        echo("prospect periode 11 recu");
+        dump($prospects_tab_recu_11);
+        echo("prospect periode 11 reception");
+        dump($prospects_tab_reception_11);
+        echo("prospect periode 11 envoi");
+        dump($prospects_tab_envoi_11);
+
+
+
+
+
+    exit;
     // test prospect avec parametre cloture
     //##########################################################################
       /*   //9936 "idFormationSouhait1" => "398436" "idFormationSouhait2" => "203348"
