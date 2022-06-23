@@ -18,6 +18,10 @@ Route::get('/', function () {
     return view('welcome');
 });
 
+//a supprimer a la fin
+use App\Http\Controllers\testRelationEntrepriseController;
+Route::get('/test', [testRelationEntrepriseController::class, 'index'])->name('relation_entreprise_index');
+
 Route::get('/r', [RelationEntrepriseController::class, 'index'])->name('relation_entreprise_index');
 
 Route::get('/RelationEntreprise/{formation}/{annee}', [RelationEntrepriseController::class, 'AffichageFormation'])->name('AffichageFormation');
