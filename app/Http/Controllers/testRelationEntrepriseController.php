@@ -70,10 +70,10 @@ class testRelationEntrepriseController extends Controller
 
 
         // /r/v1/formation-longue/prospects-with-events/@codeTypeEvt/@codeEtapeEvt/@dateDebut/@dateFin/@evtClotures
-        $url = "https://citeformations.ymag.cloud/index.php/r/v1/formation-longue/prospects-with-events/4/8/30-08-2021/28-08-2022/0";
+        $url = "https://citeformations.ymag.cloud/index.php/r/v1/formation-longue/prospects-with-events/4/8/30-08-2020/28-08-2022/0";
         $api_data_pr_recu = $this->ApiCall($url);  
         echo("periode 2021-2022 contrat recu");
-        //dump($api_data_pr_recu);
+        dump($api_data_pr_recu);
         foreach ($api_data_pr_recu as $prospect) {
                 $prospects_tab_recu[$prospect["codeApprenant"]] = array(
                     "codeApprenant" => $prospect["codeApprenant"]

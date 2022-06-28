@@ -18,13 +18,18 @@ tr td:nth-child(2) {
 
     </head>
     <body>
+
         @section('sidebar')
             Layout sidebar.
         @show
 
         <div class="container">
             <div class="mx-auto">
-            <p>test</p>
+                @if ( Session::has('flash_message') )
+                    <div class="alert {{ Session::get('flash_type') }}">
+                        <h3>{{ Session::get('flash_message') }}</h3>
+                    </div>
+                @endif
             </div>
             
         </div>

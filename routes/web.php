@@ -20,8 +20,9 @@ Route::get('/', function () {
 
 //a supprimer a la fin
 use App\Http\Controllers\testRelationEntrepriseController;
-Route::get('/test', [testRelationEntrepriseController::class, 'index'])->name('relation_entreprise_index');
+Route::get('/test', [testRelationEntrepriseController::class, 'index'])->name('relation_entreprise_index_test');
 
 Route::get('/r', [RelationEntrepriseController::class, 'index'])->name('relation_entreprise_index');
+Route::post('/r', [RelationEntrepriseController::class, 'PrevisDataBase'])->name('previs_save_database');
 
 Route::get('/RelationEntreprise/{formation}/{annee}', [RelationEntrepriseController::class, 'AffichageFormation'])->name('AffichageFormation');

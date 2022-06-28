@@ -8,8 +8,8 @@
     <h1> API TEST</h1>
     <h1>Formation</h1>
 
-
-        <h1>{{ $formation }}{{ $annee }}</h1>
+        <a href="{{ route('relation_entreprise_index')}}">detail</a>
+        <h1>{{ $formation }} {{ $annee }}</h1>
 
 
         <table id="table_id" class="display">
