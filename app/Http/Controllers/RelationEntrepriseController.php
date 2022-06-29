@@ -420,6 +420,9 @@ class RelationEntrepriseController extends Controller
         //$d_microtime = microtime(true);
         //$d_memory = memory_get_usage(true);
 
+        $request->session()->put('tableau_complet', $tableau_complet);
+        //Session::set('tableau_complet', $tableau_complet);
+
         $a_microtime = microtime(true);
         $time = $a_microtime - $d_microtime;
         $a_memory = memory_get_usage(true);
@@ -439,11 +442,14 @@ class RelationEntrepriseController extends Controller
     }
 
 
-    public function AffichageFormation($formation, $annee)
+    public function AffichageFormation(Request $request)
     {
+        $formation = $request->input('formation');
+        $annee = $request->input('annee');
         echo("{nom formation : $formation}, annee :{$annee}");
 
-        $tableau_complet_cache = Cache::get('tableau_complet_cache');
+        $tableau_complet_cache = $request->session()->get('tableau_complet');
+        //$tableau_complet_cache = Cache::get('tableau_complet_cache');
         
         if (empty($tableau_complet_cache)) {
             echo("tableau_complet_cache vide");
