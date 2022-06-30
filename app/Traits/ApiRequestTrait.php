@@ -147,12 +147,24 @@ trait ApiRequestTrait {
         return $api_data_prospects;
     }
 
+    //Prospects (possibilite de d'avoir seulement les prsopect en cours)
+    protected function ApiProspectsEvenement($codeTypeEvt, $codeEvenement, $dateDebut, $dateFin, $evtClotures )
+    {
+
+        // /r/v1/formation-longue/prospects-with-events/@codeTypeEvt/@codeEtapeEvt/@dateDebut/@dateFin/@evtClotures
+        // codeTypeEvt trouver avec la table typeEvenement https://citeformations.ymag.cloud/index.php/r/v1/types-evenement
+        $url = "https://citeformations.ymag.cloud/index.php/r/v1/formation-longue/prospects-with-events/". $codeTypeEvt ."/".$codeEvenement."/".$dateDebut."/".$dateFin."/".$evtClotures;
+        $api_data_prospect_evenement = $this->ApiCall($url);  
+
+        return $api_data_prospect_evenement;
+    }
+
 
     // ****CONTRATS
     protected function Apicontrats($code_periode=null)
     {  
         $api_data_contrats = Cache::get('api_data_contrats');
-       //$api_data_contrats = null;
+        //$api_data_contrats = null;
         if (empty($api_data_contrats)) {
             $url = "https://citeformations.ymag.cloud/index.php/r/v1/contrats?codesPeriode=".$code_periode;
             $api_data_contrats = $this->ApiCall($url);
@@ -166,16 +178,15 @@ trait ApiRequestTrait {
     protected function ApiEntreprises()
     {
         
-        $api_data_entreprises = Cache::get('api_data_entreprises');
-        //$api_data_entreprises = null;
+       // $api_data_entreprises = Cache::get('api_data_entreprises');
+        $api_data_entreprises = null;
         if (empty($api_data_entreprises)) {
             $url = "https://citeformations.ymag.cloud/index.php/r/v1/entreprises";
             $api_data_entreprises = $this->ApiCall($url);
-            Cache::put('api_data_entreprises', $api_data_entreprises, 32000);
+            //Cache::put('api_data_entreprises', $api_data_entreprises, 32000);
         }
         return $api_data_entreprises;
     }
-
 
     // ****GROUPES
     protected function ApiGroupes($code_periode=null)

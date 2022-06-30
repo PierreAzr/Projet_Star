@@ -1,8 +1,8 @@
-<html>
+<!DOCTYPE html>
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
     <head>
         <title>App Name - @yield('title')</title>
 
-        
         
          <!-- DATATABLE -->
         <script src="https://code.jquery.com/jquery-3.6.0.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
@@ -16,9 +16,7 @@
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.3/font/bootstrap-icons.css">
 <style>
 
-tr td:nth-child(2) {
-  background-color: white;
-}
+
 </style>
 
     </head>
@@ -39,23 +37,28 @@ tr td:nth-child(2) {
 
 
         @show
-
+        
         <div class="container">
             <div class="mx-auto">
+            <br>
                 @if ( Session::has('flash_message') )
                     <div class="alert {{ Session::get('flash_type') }}">
                         <h3>{{ Session::get('flash_message') }}</h3>
                     </div>
                 @endif
             </div>
-            
         </div>
  
         <div class="container">
             <br>
             @yield('content')
-            
-            
+                       
         </div>
     </body>
+    <script>
+        $("document").ready(function(){
+                    setTimeout(function(){ $("div.alert").remove(); }, 5000 ); // 5 secs
+
+         });
+    </script>
 </html>

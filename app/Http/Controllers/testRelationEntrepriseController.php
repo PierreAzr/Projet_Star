@@ -23,6 +23,31 @@ class testRelationEntrepriseController extends Controller
         //Cache::flush();
 
 
+        $d_microtime = microtime(true);
+        $d_memory = memory_get_usage(true);
+
+        $api_data_contrats = $this->ApiContrats(11);
+
+        $a_microtime = microtime(true);
+        $time = $a_microtime - $d_microtime;
+        $a_memory = memory_get_usage(true);
+        $memory = $a_memory - $d_memory;
+        echo("temps execution : {$time}, Memoire utlisé : {$memory}"); 
+        dump($api_data_contrats);
+
+        $d_microtime = microtime(true);
+        $d_memory = memory_get_usage(true);
+
+        $api_data_contrats2 = $this->ApiContrats();
+
+        $a_microtime = microtime(true);
+        $time = $a_microtime - $d_microtime;
+        $a_memory = memory_get_usage(true);
+        $memory = $a_memory - $d_memory;
+        echo("temps execution : {$time}, Memoire utlisé : {$memory}"); 
+        dump($api_data_contrats2);
+        exit;
+
 
         $d_microtime = microtime(true);
         $d_memory = memory_get_usage(true);
