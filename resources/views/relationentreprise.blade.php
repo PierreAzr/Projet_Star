@@ -21,7 +21,8 @@
 <div class="col-2 d-flex justify-content-center">
     <form method="get" action="{{ route('relation_entreprise_index') }}">
         <div class="input-group mb-3">
-            <input type="date" class="form-control"  min="{{ $date }}" max='2025-01-01' name="date" value="{{ $date }}">
+            @php($date_min = date('Y-m-d'))
+            <input type="date" class="form-control"  min="{{ $date_min }}"  name="date" value="{{ $date }}">
             <button class="btn btn-primary" type="submit">Go</button>
         </div>
     </form>

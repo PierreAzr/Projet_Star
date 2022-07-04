@@ -183,7 +183,7 @@ class RelationEntrepriseController extends Controller
         } */
   
       
-        $apprenants_tab = $this->ApprenantsTab($date_du_jour,$code_periode_actuel,$code_periode_precedente);
+        $apprenants_tab = $this->ApprenantsTab($date_du_jour,$code_periode_actuel,$code_periode_precedente, $frequente_tab);
 
         //##Recupere la table des prospects voulu##
         $date_debut_prospect = $date_annee_precedente->format('d-m-Y');
