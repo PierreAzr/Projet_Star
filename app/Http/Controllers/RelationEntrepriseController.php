@@ -46,7 +46,7 @@ class RelationEntrepriseController extends Controller
 
         if(empty($date)){
             echo("ttttt dateempty tttttt");
-            $date_vide = 1;
+            $date_vide = true;
             $date = date("Y-m-d");
             $date_du_jour = date_create_from_format('d/m/Y', date("d/m/Y") );
             $date_annee_precedente = date_create_from_format('d/m/Y', date("d/m/Y") )->modify('-1 year');
@@ -84,6 +84,31 @@ class RelationEntrepriseController extends Controller
         }
 
 
+        //$api_data_frequentes = $this->ApiFrequentes($code_periode_actuel);
+
+        $api_data_frequentes = Cache::get('api_data_frequentes');
+        if (empty($api_data_frequentes)) {
+            $api_data_frequentes = $this->ApiFrequentes($code_periode_actuel);
+            Cache::put('api_data_frequentes', $api_data_frequentes, 32000);
+        } 
+
+        $count = 0;
+        foreach ($api_data_frequentes as $frequente) {
+
+            $date_fin = date_create_from_format('d/m/Y', $frequente["dateFin"]);
+            $date_deb = date_create_from_format('d/m/Y', $frequente["dateDeb"]);
+            if( (empty($frequente["dateFin"]) || $date_du_jour < $date_fin) && ($date_du_jour > $date_deb)) {
+                
+                $frequente_tab[$frequente["codeApprenant"]] = array(
+                    "codeApprenant" => $frequente["codeApprenant"],
+                );
+                $count++;
+            }
+        }
+
+
+
+
         $previs = \App\Models\Previ::where('periode', $periode_actuel)->get();
 
         //$date_vide = null;
@@ -110,12 +135,11 @@ class RelationEntrepriseController extends Controller
 
 
 
-
-         $date_tab =0;
+/* 
+        $date_tab =0;
         $date_tab = $request->session()->get('date_flash');
   
         if($date == $date_tab){
-
             
             echo('******************date = date_flash *****************');
             $final_tab = $request->session()->get('final_tab_flash');
@@ -129,48 +153,16 @@ class RelationEntrepriseController extends Controller
             ->with(compact('previs'))
             ->with(compact('date'))
             ->with(compact('periode_actuel'));
-        } 
+        }  */
 
         
         // Fin calcul Periode
 
 
         //dd($code_periode_actuel);
-                //requete avec cache pour test affichage
-                 $api_data_apprenants = Cache::get('api_data_apprenants');
-                if (empty($api_data_apprenants)) {
-                    $api_data_apprenants = $this->ApiApprenants($code_periode_actuel);
-                    Cache::put('api_data_apprenants', $api_data_apprenants, 32000);
-                }
-        
-                $api_data_apprenants_precedent = Cache::get('api_data_apprenants_precedent');
-                if (empty($api_data_apprenants_precedent)) {
-                    $api_data_apprenants_precedent = $this->ApiApprenants($code_periode_precedente);
-                    Cache::put('api_data_apprenants_precedent', $api_data_apprenants_precedent, 32000);
-                }
-                
-                $api_data_frequentes = Cache::get('api_data_frequentes');
-                if (empty($api_data_frequentes)) {
-                    $api_data_frequentes = $this->ApiFrequentes($code_periode_actuel);
-                    Cache::put('api_data_frequentes', $api_data_frequentes, 32000);
-                } 
-        
-               
-                $api_data_frequentes_precedent = Cache::get('api_data_frequentes_precedent');
-                if (empty($api_data_frequentes_precedent)) {
-                    $api_data_frequentes_precedent = $this->ApiFrequentes($code_periode_precedente);
-                    Cache::put('api_data_frequentes_precedent', $api_data_frequentes_precedent, 32000);
-                }   
 
-/*         $api_data_apprenants = $this->ApiApprenants($code_periode_actuel);
-        $api_data_apprenants_precedent = $this->ApiApprenants($code_periode_precedente);
-        $api_data_frequentes = $this->ApiFrequentes($code_periode_actuel); 
-        $api_data_frequentes_precedent = $this->ApiFrequentes($code_periode_precedente);   */
 
-        
-        $api_data_contrats = $this->ApiContrats($code_periode_actuel);
-
-        $api_data_groupes = $this->ApiGroupes();//cache
+       // $api_data_groupes = $this->ApiGroupes();//cache
        
 
 
@@ -180,151 +172,26 @@ class RelationEntrepriseController extends Controller
         } */
 
         //#################      
-        //Tableau entreprise
-        $entreprises_tab = Cache::get('entreprises_tab');
-        if (empty($entreprises_tab)) {
 
-            $api_data_entreprises = $this->ApiEntreprises();
 
-            // tableau avec code entreprise en key et le nom en valeur 
-            foreach ($api_data_entreprises as $entreprise) {
-                $entreprises_tab[$entreprise["codeEntreprise"]] = $entreprise["nomEntreprise"];
-            }
-
-            Cache::put('entreprises_tab', $entreprises_tab, 32000);
-        }
-
-    
-  
-        $erreur = 0;
-        foreach ($api_data_contrats as $contrat) {
-
-            $date_fin = date_create_from_format('d/m/Y', $contrat["dateFinContrat"] ) ;
-            //$date_du_jour = date_create_from_format('d/m/Y', date("d/m/Y") );
-
-            if (empty($contrat["dateResiliation"]) && !empty($contrat["codeEntreprise"])) {
-                if ($date_fin > $date_du_jour) {
-
-                $contrats_tab[$contrat["codeApprenant"]] = array(
-                    "codeEntreprise" =>$contrat["codeEntreprise"],
-                    "codeContrat" => $contrat["codeContrat"],
-                    "dateDebContrat" => $contrat["dateDebContrat"]
-                );
-                
-                }
-            }else {
-                $date_fin = date_create_from_format('d/m/Y', $contrat["dateResiliation"] );
-                if ($date_fin > $date_du_jour) {
-
-                    $erreur++;
-                    //dump($contrat);
-                }
-                    
-            }
-
-        }
-
-        //tableau groupes
+     /*        //tableau groupes
         foreach ($api_data_groupes as $groupe) {
             $groupes_tab[$groupe["codeGroupe"]] = array(
                 "nomGroupe" =>$groupe["nomGroupe"],
                 "capaciteMax" => $groupe["capaciteMax"]
             );
-        }
- 
-        foreach ($api_data_frequentes_precedent as $frequente) {
-                
-                $frequente_tab_precedent[$frequente["codeApprenant"]] = $frequente["codeApprenant"];
-           
-        } 
+        } */
+  
+      
+        $apprenants_tab = $this->ApprenantsTab($date_du_jour,$code_periode_actuel,$code_periode_precedente);
 
-        foreach ($api_data_apprenants_precedent as $apprenant) {  
-
-            if (!empty($frequente_tab_precedent[$apprenant["codeApprenant"]])) {
-                for ($i=0; $i < count($apprenant["inscriptions"]) ; $i++) { 
-                    if ($apprenant["inscriptions"][$i]["isInscriptionEnCours"] == 1) {
-                        $apprenants_tab_precedent[$apprenant["codeApprenant"]] = $apprenant["inscriptions"][$i]["formation"]["nomFormation"];
-                    }
-                }
-                
-            }
-                        
-        }
-
-        $count = 0;
-        foreach ($api_data_frequentes as $frequente) {
-
-            $date_fin = date_create_from_format('d/m/Y', $frequente["dateFin"]);
-            $date_deb = date_create_from_format('d/m/Y', $frequente["dateDeb"]);
-            if( (empty($frequente["dateFin"]) || $date_du_jour < $date_fin) && ($date_du_jour > $date_deb)) {
-                
-                $frequente_tab[$frequente["codeApprenant"]] = array(
-                    "codeApprenant" => $frequente["codeApprenant"],
-                );
-                $count++;
-            }
-        }
-
-     
-        // tableau apprenant complete + creation tableau formation
-        $formation_tab = [];
-        foreach ($api_data_apprenants as $apprenant) {
-            
-            //si l'apprenant et dans la table de frequentation
-            if (!empty($frequente_tab[$apprenant["codeApprenant"]])) {     
-
-                //tout apprenant et nouveau sauf s'il est dans la table apprenant et que son nom de formaton est le meme
-                $nouveau = 1;
-                if (!empty($apprenants_tab_precedent[$apprenant["codeApprenant"]])) {
-
-                    $nomfomation = $apprenant["inscriptions"][0]["formation"]["nomFormation"];
-                    $nomfomation_precedent = $apprenants_tab_precedent[$apprenant["codeApprenant"]];
-                    if ($nomfomation == $nomfomation_precedent) {
-                        $nouveau = 0;
-                    }           
-                }
-
-                $apprenants_tab[$apprenant["codeApprenant"]] = array(
-                    "nomApprenant" => $apprenant["nomApprenant"],
-                    "prenomApprenant" => $apprenant["prenomApprenant"],
-                    "dateCreation" => $apprenant["dateCreation"],
-                    "nouveau" => $nouveau,
-                );
-
-                for ($i=0; $i < count($apprenant["inscriptions"]) ; $i++) { 
-                    if ($apprenant["inscriptions"][$i]["isInscriptionEnCours"] == 1) {
-                        $apprenants_tab[$apprenant["codeApprenant"]] += array(
-                            "nomStatut" => $apprenant["inscriptions"][$i]["situation"]["nomStatut"],
-                            "nomAnnee" => $apprenant["inscriptions"][$i]["situation"]["nomAnnee"],
-                            "nomFormation" => $apprenant["inscriptions"][$i]["formation"]["nomFormation"],
-                            "nomSecteurActivite" => $apprenant["inscriptions"][$i]["formation"]["nomSecteurActivite"],
-                        );
-                    }
-                }
-
-                // si il a un contrat on rajoute les informations du contrat
-                if (!empty($contrats_tab[$apprenant["codeApprenant"]])) {
-                
-                    $code_entreprise = $contrats_tab[$apprenant["codeApprenant"]]["codeEntreprise"];
-
-                    $apprenants_tab[$apprenant["codeApprenant"]] += array(
-                        "dateDebContrat" => $contrats_tab[$apprenant["codeApprenant"]]["dateDebContrat"],
-                        "nomEntreprise" => $entreprises_tab[ $code_entreprise ]
-                        //"nomEntreprise" => $entreprises_tab[ $contrat[$apprenant["codeApprenant"]]["codeEntreprise"] ]["nomEntreprise"]
-                    );
-
-                }
-
-            }
-        }
-
-
-
+        //##Recupere la table des prospects voulu##
         $date_debut_prospect = $date_annee_precedente->format('d-m-Y');
         $date_fin_prospect = $date_du_jour->format('d-m-Y');
 
-        $prospects_tab = $this->ProspectTab($code_periode_actuel, $date_debut_prospect, $date_fin_prospect);
-        
+        $prospects_tab = $this->ProspectsTab($code_periode_actuel, $date_debut_prospect, $date_fin_prospect, $frequente_tab);
+        //##
+
 
         if (isset($prospects_tab) && $apprenants_tab) {
             $tableau_complet = array_merge($prospects_tab, $apprenants_tab);
@@ -360,10 +227,7 @@ class RelationEntrepriseController extends Controller
             Cache::put('tableau_complet_date_vide', $tableau_complet, 32000);
         }
 
-        $request->session()->put('date_tableau_complet', $date);
-        $request->session()->put('final_tab', $final_tab,);
-        $request->session()->put('total_tab', $total_tab);
-        $request->session()->put('tableau_complet', $tableau_complet);
+
 
         echo('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa');
         $request->session()->put('tableau_complet_flash', $tableau_complet);
@@ -501,7 +365,7 @@ class RelationEntrepriseController extends Controller
         return $tab_data_prospect_evenement;
     }
 
-    protected function ProspectTab($code_periode_actuel, $date_debut_prospect, $date_fin_prospect)
+    protected function ProspectsTab($code_periode_actuel, $date_debut_prospect, $date_fin_prospect, $frequente_tab)
     {
         $api_data_prospects = $this->ApiProspects($code_periode_actuel);
 
@@ -525,34 +389,195 @@ class RelationEntrepriseController extends Controller
             $prospects_tab_envoi = $this->ProspectEvenement($codeEvenement=149, $date_debut_prospect, $date_fin_prospect );
             Cache::put('prospects_tab_envoi', $prospects_tab_envoi, 32000);
         }
+   
 
-        //tableau Prospects complete
-        foreach ($api_data_prospects as $prospect) {
+        foreach ($api_data_prospects as $codeApprenant => $prospect) {
 
-            $codeEtape = $prospect["evenementsRacines"][0]["dernierEvenement"]["codeEtapeEvenement"];
 
             $code_app = $prospect["codeApprenant"];
             if (!empty($prospects_tab_envoi[$code_app]) || !empty($prospects_tab_recu[$code_app]) || !empty($prospects_tab_reception[$code_app]) ) {
-                //si l'apprenant n'est pas en cours de formation alors il est prospect
-                //if (empty($frequente_tab[$prospect["codeApprenant"]])) {             
-
-                    $prospects_tab[$prospect["codeApprenant"]] = array(
-                        "codeEtapeEvenement" => $prospect["evenementsRacines"][0]["dernierEvenement"]["codeEtapeEvenement"],
-                        "nomEtapeEvenement" => $prospect["evenementsRacines"][0]["dernierEvenement"]["nomEtapeEvenement"],
-                        "nomFormation" => $prospect["formationsSouhaitees"][0]["nomFormation"],
-                        "nomAnnee" => $prospect["formationsSouhaitees"][0]["nomAnnee"],
-                        "nomStatut" => $prospect["formationsSouhaitees"][0]["nomStatut"],
-                        "dateCreation" => $prospect["dateCreation"],
-                        "nomApprenant" => $prospect["nomApprenant"],
-                        "prenomApprenant" => $prospect["prenomApprenant"]
-                    );
+               
+                // un prospect ne peu pas etre en cours de formation
+                if (empty($frequente_tab[$code_app])) {
+                   
                 
+                    //un prospect peu avoir plusieurs evenement racine, on prend le dernier qui correspond au dernier en date
+                    $nombre_evenement_racine = count($prospect["evenementsRacines"]);            
+                    $dernier_evenement_racine = $prospect["evenementsRacines"][$nombre_evenement_racine - 1]; 
+
+                    // si un evenement choisi c'est passe sur la periode mais n'est pas le dernier
+                    $codeEtape = $dernier_evenement_racine["dernierEvenement"]["codeEtapeEvenement"];
+                    if ($codeEtape == 8 || $codeEtape == 149 || $codeEtape == 151 ) {
+
+                        //Construction du tableau prsopects
+                        //Attention certain prospect on plusieur formation souhaite pour l'instant on prend la premiere
+                        $prospects_tab[$prospect["codeApprenant"]] = array(
+                            "codeEtapeEvenement" => $dernier_evenement_racine["dernierEvenement"]["codeEtapeEvenement"],
+                            "nomEtapeEvenement" => $dernier_evenement_racine["dernierEvenement"]["nomEtapeEvenement"],
+                            "nomFormation" => $dernier_evenement_racine["formationsSouhaitees"][0]["nomFormation"],
+                            "nomAnnee" => $dernier_evenement_racine["formationsSouhaitees"][0]["nomAnnee"],
+                            "nomStatut" => $dernier_evenement_racine["formationsSouhaitees"][0]["nomStatut"],
+                            "nomApprenant" => $prospect["nomApprenant"],
+                            "prenomApprenant" => $prospect["prenomApprenant"]
+                        );
+                    }
+                }
             }
+
                      
         }
 
         return $prospects_tab;
     }
+
+    public function ApprenantsTab($date_du_jour,$code_periode_actuel,$code_periode_precedente, $frequente_tab)
+    {
+
+                        //requete avec cache pour test affichage
+                        $api_data_apprenants = Cache::get('api_data_apprenants');
+                        if (empty($api_data_apprenants)) {
+                            $api_data_apprenants = $this->ApiApprenants($code_periode_actuel);
+                            Cache::put('api_data_apprenants', $api_data_apprenants, 32000);
+                        }
+                
+                        $api_data_apprenants_precedent = Cache::get('api_data_apprenants_precedent');
+                        if (empty($api_data_apprenants_precedent)) {
+                            $api_data_apprenants_precedent = $this->ApiApprenants($code_periode_precedente);
+                            Cache::put('api_data_apprenants_precedent', $api_data_apprenants_precedent, 32000);
+                        }
+                                               
+                        $api_data_frequentes_precedent = Cache::get('api_data_frequentes_precedent');
+                        if (empty($api_data_frequentes_precedent)) {
+                            $api_data_frequentes_precedent = $this->ApiFrequentes($code_periode_precedente);
+                            Cache::put('api_data_frequentes_precedent', $api_data_frequentes_precedent, 32000);
+                        }   
+        
+        /*      $api_data_apprenants = $this->ApiApprenants($code_periode_actuel);
+                $api_data_apprenants_precedent = $this->ApiApprenants($code_periode_precedente);
+                
+                $api_data_frequentes_precedent = $this->ApiFrequentes($code_periode_precedente);   */
+        
+                
+                $api_data_contrats = $this->ApiContrats($code_periode_actuel);
+        
+        $erreur = 0;
+        foreach ($api_data_contrats as $contrat) {
+
+            $date_fin = date_create_from_format('d/m/Y', $contrat["dateFinContrat"] ) ;
+            //$date_du_jour = date_create_from_format('d/m/Y', date("d/m/Y") );
+
+            if (empty($contrat["dateResiliation"]) && !empty($contrat["codeEntreprise"])) {
+                if ($date_fin > $date_du_jour) {
+
+                $contrats_tab[$contrat["codeApprenant"]] = array(
+                    "codeEntreprise" =>$contrat["codeEntreprise"],
+                    "codeContrat" => $contrat["codeContrat"],
+                    "dateDebContrat" => $contrat["dateDebContrat"]
+                );
+                
+                }
+            }else {
+                $date_fin = date_create_from_format('d/m/Y', $contrat["dateResiliation"] );
+                if ($date_fin > $date_du_jour) {
+
+                    $erreur++;
+                    //dump($contrat);
+                }
+                    
+            }
+
+        }
+
+        //Tableau entreprise
+        $entreprises_tab = Cache::get('entreprises_tab');
+        if (empty($entreprises_tab)) {
+
+            $api_data_entreprises = $this->ApiEntreprises();
+
+            // tableau avec code entreprise en key et le nom en valeur 
+            foreach ($api_data_entreprises as $entreprise) {
+                $entreprises_tab[$entreprise["codeEntreprise"]] = $entreprise["nomEntreprise"];
+            }
+
+            Cache::put('entreprises_tab', $entreprises_tab, 32000);
+        }
+
+ 
+        foreach ($api_data_frequentes_precedent as $frequente) {
+                
+                $frequente_tab_precedent[$frequente["codeApprenant"]] = $frequente["codeApprenant"];
+           
+        } 
+
+        foreach ($api_data_apprenants_precedent as $apprenant) {  
+
+            if (!empty($frequente_tab_precedent[$apprenant["codeApprenant"]])) {
+                for ($i=0; $i < count($apprenant["inscriptions"]) ; $i++) { 
+                    if ($apprenant["inscriptions"][$i]["isInscriptionEnCours"] == 1) {
+                        $apprenants_tab_precedent[$apprenant["codeApprenant"]] = $apprenant["inscriptions"][$i]["formation"]["nomFormation"];
+                    }
+                }
+                
+            }
+                        
+        }
+
+   
+        // tableau apprenant complete + creation tableau formation
+        $formation_tab = [];
+        foreach ($api_data_apprenants as $apprenant) {
+            
+            //si l'apprenant et dans la table de frequentation
+            if (!empty($frequente_tab[$apprenant["codeApprenant"]])) {     
+
+                //tout apprenant et nouveau sauf s'il est dans la table apprenant et que son nom de formaton est le meme
+                $nouveau = 1;
+                if (!empty($apprenants_tab_precedent[$apprenant["codeApprenant"]])) {
+
+                    $nomfomation = $apprenant["inscriptions"][0]["formation"]["nomFormation"];
+                    $nomfomation_precedent = $apprenants_tab_precedent[$apprenant["codeApprenant"]];
+                    if ($nomfomation == $nomfomation_precedent) {
+                        $nouveau = 0;
+                    }           
+                }
+
+                $apprenants_tab[$apprenant["codeApprenant"]] = array(
+                    "nomApprenant" => $apprenant["nomApprenant"],
+                    "prenomApprenant" => $apprenant["prenomApprenant"],
+                    "dateCreation" => $apprenant["dateCreation"],
+                    "nouveau" => $nouveau,
+                );
+
+                for ($i=0; $i < count($apprenant["inscriptions"]) ; $i++) { 
+                    if ($apprenant["inscriptions"][$i]["isInscriptionEnCours"] == 1) {
+                        $apprenants_tab[$apprenant["codeApprenant"]] += array(
+                            "nomStatut" => $apprenant["inscriptions"][$i]["situation"]["nomStatut"],
+                            "nomAnnee" => $apprenant["inscriptions"][$i]["situation"]["nomAnnee"],
+                            "nomFormation" => $apprenant["inscriptions"][$i]["formation"]["nomFormation"],
+                            "nomSecteurActivite" => $apprenant["inscriptions"][$i]["formation"]["nomSecteurActivite"],
+                        );
+                    }
+                }
+
+                // si il a un contrat on rajoute les informations du contrat
+                if (!empty($contrats_tab[$apprenant["codeApprenant"]])) {
+                
+                    $code_entreprise = $contrats_tab[$apprenant["codeApprenant"]]["codeEntreprise"];
+
+                    $apprenants_tab[$apprenant["codeApprenant"]] += array(
+                        "dateDebContrat" => $contrats_tab[$apprenant["codeApprenant"]]["dateDebContrat"],
+                        "nomEntreprise" => $entreprises_tab[ $code_entreprise ]
+                        //"nomEntreprise" => $entreprises_tab[ $contrat[$apprenant["codeApprenant"]]["codeEntreprise"] ]["nomEntreprise"]
+                    );
+
+                }
+
+            }
+        }
+
+        return  $apprenants_tab;
+    }
+
 
     protected function AffichageFormation(Request $request)
     {
@@ -629,5 +654,160 @@ class RelationEntrepriseController extends Controller
        return redirect()->route('relation_entreprise_index', ['date' => $date])->with('flash_message', 'Previsionel enregitrer')
                                                     ->with('flash_type', 'alert-success');
 
+    }
+
+
+    public function test(Type $var = null)
+    {
+        //####################################################
+        //#################################################################
+ 
+        $date_debut_prospect = $date_annee_precedente->format('d-m-Y');
+        $date_fin_prospect = $date_du_jour->format('d-m-Y');
+        $prospects_tab = $this->ProspectsTab($code_periode_actuel, $date_debut_prospect, $date_fin_prospect, $frequente_tab);
+
+        //dd($prospects_tab);
+
+        $api_data_contrats = $this->ApiContrats($code_periode_actuel);
+     
+        $erreur = 0;
+        foreach ($api_data_contrats as $contrat) {
+
+            $date_fin = date_create_from_format('d/m/Y', $contrat["dateFinContrat"] ) ;
+            //$date_du_jour = date_create_from_format('d/m/Y', date("d/m/Y") );
+
+            if (empty($contrat["dateResiliation"]) && !empty($contrat["codeEntreprise"])) {
+                if ($date_fin > $date_du_jour) {
+
+                $contrats_tab[$contrat["codeApprenant"]] = array(
+                    "codeEntreprise" =>$contrat["codeEntreprise"],
+                    "codeContrat" => $contrat["codeContrat"],
+                    "dateDebContrat" => $contrat["dateDebContrat"]
+                );
+                
+                }
+            }else {
+                $date_fin = date_create_from_format('d/m/Y', $contrat["dateResiliation"] );
+                if ($date_fin > $date_du_jour) {
+
+                    $erreur++;
+                    //dump($contrat);
+                }
+                    
+            }
+
+        }
+        echo("prospects_tab");
+        dump($prospects_tab);
+        //exit;
+        //####################################################
+        $count= 0;
+         foreach ($prospects_tab as $code => $prospect) {
+            if (!empty($contrats_tab[$code])) {
+               $count++;
+
+            }
+        } 
+
+        echo("nombre de prsopect avec contrat");
+        dump($count);
+ 
+
+        
+        //exit;
+        //#########################################################################
+       
+
+        //564049
+        $url = "https://citeformations.ymag.cloud/index.php/r/v1/apprenants/564049";
+        //$test = $this->ApiCall($url);
+        //dd($test);
+
+        $code=880416;
+        
+        $code=508715;
+        $code=801141;
+        $code= 0;
+        //dump($prospects_tab_recu[$code]);
+        //dump($prospects_tab_reception[$code]);
+        //dump($prospects_tab_envoi[$code]); 
+        echo("test code");
+        $api_data_prospects = $this->ApiProspects($code_periode_actuel);
+        foreach ($api_data_prospects as $prospect) {
+
+            if ($prospect["codeApprenant"] ==  $code ){
+                $t= count($prospect["evenementsRacines"]);
+                echo("prospect evenement racite $t");              
+                dump($prospect);
+
+            }
+
+        }
+        $api_data_prospects = $this->ApiProspects($code_periode_actuel);
+        foreach ($api_data_prospects as $prospect) {
+
+            $nombre_evenement_racine = count($prospect["evenementsRacines"]);            
+            $dernier_evenement_racine = $prospect["evenementsRacines"][$nombre_evenement_racine - 1];
+
+  
+            $codeEtape = $prospect["evenementsRacines"][0]["dernierEvenement"]["codeEtapeEvenement"];
+            if ($codeEtape == 8 || $codeEtape == 149 || $codeEtape == 151 ) {
+                if(!empty($dernier_evenement_racine["formationsSouhaitees"][1])){
+                    $prospects_tab_test[$prospect["codeApprenant"]] = array(
+                        "codeEtapeEvenement" => $dernier_evenement_racine["dernierEvenement"]["codeEtapeEvenement"],
+                        "nomEtapeEvenement" => $dernier_evenement_racine["dernierEvenement"]["nomEtapeEvenement"],
+                        "nomFormation" => $dernier_evenement_racine["formationsSouhaitees"][0]["nomFormation"],
+                        "nomFormation2" => $dernier_evenement_racine["formationsSouhaitees"][1]["nomFormation"],
+                        "nomAnnee" => $dernier_evenement_racine["formationsSouhaitees"][0]["nomAnnee"],
+                        "nomStatut" => $dernier_evenement_racine["formationsSouhaitees"][0]["nomStatut"],
+                        "nomApprenant" => $prospect["nomApprenant"],
+                        "prenomApprenant" => $prospect["prenomApprenant"]
+                    );
+                }
+            }
+            
+
+        }
+        dd($prospects_tab_test);
+ 
+        $api_data_apprenants = Cache::get('api_data_apprenants');
+        //$api_data_apprenants = $this->ApiApprenants(15);
+        //$api_data_apprenants = Cache::get('api_data_apprenants_precedent');
+        foreach ($api_data_apprenants as $apprenant) {
+            
+            //si l'apprenant et dans la table de frequentation
+            if (!empty( $prospects_tab_test[$apprenant["codeApprenant"]])) {    
+
+
+                $apprenants_tab[$apprenant["codeApprenant"]] = array(
+                    "nomApprenant" => $apprenant["nomApprenant"],
+                    "prenomApprenant" => $apprenant["prenomApprenant"],
+                    "dateCreation" => $apprenant["dateCreation"],
+                );
+
+                for ($i=0; $i < count($apprenant["inscriptions"]) ; $i++) { 
+                    if ($apprenant["inscriptions"][$i]["isInscriptionEnCours"] == 1) {
+                        $apprenants_tab[$apprenant["codeApprenant"]] += array(
+                            "nomStatut" => $apprenant["inscriptions"][$i]["situation"]["nomStatut"],
+                            "nomAnnee" => $apprenant["inscriptions"][$i]["situation"]["nomAnnee"],
+                            "nomFormation" => $apprenant["inscriptions"][$i]["formation"]["nomFormation"],
+                            "nomSecteurActivite" => $apprenant["inscriptions"][$i]["formation"]["nomSecteurActivite"],
+                        );
+                    }
+                }
+
+
+
+
+            }
+        }
+        dump($prospects_tab_test);
+        dump($apprenants_tab); 
+
+  
+        echo("fin test");
+        exit; 
+        //####################################################
+        //#########################################################################
     }
 }

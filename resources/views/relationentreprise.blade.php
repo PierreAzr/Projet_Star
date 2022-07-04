@@ -13,7 +13,7 @@
 <div class="col-3 d-inline-flex justify-content-end">
 
 <div>
-<div class="d-flex p-2 bg-primary text-white">{{ $periode_actuel }}</div>  
+<div class="d-flex p-2 bg-Secondary text-white">{{ $periode_actuel }}</div>  
 
 </div>
     
@@ -271,7 +271,7 @@
                 language: {
                     url: 'http:////cdn.datatables.net/plug-ins/1.12.1/i18n/fr-FR.json'
                 },
-                lengthMenu: [ [10, 25, 50, -1], [10, 25, 50, "Tous"] ],
+                lengthMenu: [ [-1, 10, 25 ], ["Tous", 10, 25  ] ],
                 
             });
 
