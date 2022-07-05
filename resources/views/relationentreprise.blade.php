@@ -12,10 +12,18 @@
 <div class="row">
 <div class="col-3 d-inline-flex justify-content-end">
 
-<div>
-<div class="d-flex p-2 bg-Secondary text-white">{{ $periode_actuel }}</div>  
+    <div>
 
-</div>
+    <div class="d-flex p-2 bg-Secondary text-white">{{ $periode_actuel }}</div>  
+
+    </div>
+    <div class="d-flex p-2"></div>
+    <div>
+    @php($date_format = date_create_from_format('Y-m-d', $date )->format('d-m-Y'))
+    <div class="d-flex p-2 bg-Secondary text-white">{{ $date_format }}</div> 
+    
+
+    </div>
     
 </div >
 <div class="col-2 d-flex justify-content-center">
@@ -206,11 +214,6 @@
                                 } );
                     </script>
 
-
-
-                    <a href="{{ route('affichage_formation', ['formation' => $formation['nomFormation'],'annee' => $formation['nomAnnee'], 'date' => $date ]) }}">
-                    <i class="bi bi-search"></i>
-                    </a>
                 </td>   
             </tr>
             @endforeach
