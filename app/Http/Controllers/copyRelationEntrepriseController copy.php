@@ -28,11 +28,8 @@ class RelationEntrepriseController extends Controller
         $d_microtime = microtime(true);
         $d_memory = memory_get_usage(true);
 
-
         
-        //Recuperation de la table periode 
-        //trouver la periode qui correspond a la date voulu (date du jour par defaut) 
-        //ainsi que la periode n-1
+        // Recuperation de la table periode et trouver la periode qui correspond a la date voulu (date du jour par defaut) ainsi que la periode n-1
         //##############################################################"
         
         //On recupere la date s'il y en a une
@@ -71,20 +68,7 @@ class RelationEntrepriseController extends Controller
             }
             
         }
-        // Fin calcul Periode
 
-
-        /*         
-        $previs = \App\Models\Previ::where('periode', $periode_actuel)->get();
-        $formations = \App\Models\Formations::all();
-
-        $test = \App\Models\Formations::join('previs', 'previs.idFormation', '=', 'formations.id')
-            ->where('previs.periode', $periode_actuel)
-            ->get(['formations.*', 'previs.*']);
-        foreach ($test as $key => $value) {
-            dd($value['periode']);
-        } */
-        
 
         if(!isset($code_periode_actuel)){
             return redirect()->route('relation_entreprise_index')->with('flash_message', "La date correspond a une periode qui n'existe pas encore")
@@ -93,192 +77,16 @@ class RelationEntrepriseController extends Controller
 
         $previs = \App\Models\Previ::where('periode', $periode_actuel)->get();
 
-        $date_vide = null;
+        //$date_vide = null;
         if(!empty($date_vide)){
             echo("***********datevide***********");
             $tableau_complet = Cache::get('tableau_complet_date_vide');
             $final_tab = Cache::get('final_tab_date_vide');
-            $total_tab = Cache::get('total_tab_date_vide');     
+            $total_tab = Cache::get('total_tab_date_vide');  
 
             if (!empty($tableau_complet) && !empty($final_tab) && !empty($total_tab)) {
          
                 echo("***********datevide***********");
-                return view('relationentreprise')
-                ->with(compact('final_tab'))
-                ->with(compact('total_tab'))
-                ->with(compact('tableau_complet'))
-                ->with(compact('previs'))
-                ->with(compact('date'))
-                ->with(compact('periode_actuel'));
-            }
-
-        }
-
-       // $api_data_frequentes = $this->ApiFrequentes($code_periode_actuel);
-
-        $api_data_frequentes = Cache::get('api_data_frequentes');
-        if (empty($api_data_frequentes)) {
-            $api_data_frequentes = $this->ApiFrequentes($code_periode_actuel);
-            Cache::put('api_data_frequentes', $api_data_frequentes, 32000);
-        }  
-
-        $count = 0;
-        $frequente_tab=[];
-        foreach ($api_data_frequentes as $frequente) {
-
-            $date_fin = date_create_from_format('d/m/Y', $frequente["dateFin"]);
-            $date_deb = date_create_from_format('d/m/Y', $frequente["dateDeb"]);
-            if( (empty($frequente["dateFin"]) || $date_du_jour < $date_fin) && ($date_du_jour > $date_deb)) {
-                
-                $frequente_tab[$frequente["codeApprenant"]] = array(
-                    "codeApprenant" => $frequente["codeApprenant"],
-                );
-                $count++;
-            }
-        }
-
-
-       
-
-
-        $apprenants_tab = $this->ApprenantsTab($date_du_jour,$code_periode_actuel,$code_periode_precedente, $frequente_tab);
-
-        //##Recupere la table des prospects voulu##
-        $date_debut_prospect = $date_annee_precedente->format('d-m-Y');
-        $date_fin_prospect = $date_du_jour->format('d-m-Y');
-
-        $prospects_tab = $this->ProspectsTab($code_periode_actuel, $date_debut_prospect, $date_fin_prospect, $frequente_tab);
-        //##
-        
-
-        //############################################################################
-        //############################################################################
-        //$this->testfrequantation($prospects_tab);
-        //$this->testCommun($apprenants_tab,$prospects_tab);
-        //$this->test($code_periode_actuel, $date_annee_precedente, $date_du_jour, $frequente_tab);
-        //$this->frequentUnique();
-        //exit;
-        //############################################################################
-        //############################################################################  
-
-        if (isset($prospects_tab) && isset($apprenants_tab)) {
-            
-            //$tableau_complet = array_merge($prospects_tab, $apprenants_tab);
-            //dump($tableau_complet);
-            $tableau_complet = $apprenants_tab+$prospects_tab;
-            //dd($tableau_complet);
-        }elseif (isset($apprenants_tab)) {
-            $tableau_complet = $apprenants_tab;
-        }elseif (isset($prospects_tab)){
-            $tableau_complet = $prospects_tab;
-        }else{
-            return redirect()->route('relation_entreprise_index')->with('flash_message', "La date correspond a une periode qui existe mais il n'y a encore ni prospects ni apprenant")
-            ->with('flash_type', 'alert-danger');  
-        }
-       
-        
-        $liste_tableau = $this->ConstructionTableauFinal($tableau_complet);
-            $final_tab = $liste_tableau['final_tab'];
-            $total_tab = $liste_tableau['total_tab'];
-        
-        //##erreur
-        //$erreur = $this->Erreur($tableau_complet);
-
-
-        // mise en cache tableau complet, final_tab et total_tab dans le cas ou la date est vide et donc on prend la date du jour
-        if(isset($date_vide)){
-            echo('sesesese  set date vide seseseeseees');
-            Cache::put('final_tab_date_vide', $final_tab, 32000);
-            Cache::put('total_tab_date_vide', $total_tab, 32000);
-            Cache::put('tableau_complet_date_vide', $tableau_complet, 32000);
-        }
-
-        $a_microtime = microtime(true);
-        $time = $a_microtime - $d_microtime;
-        $a_memory = memory_get_usage(true);
-        $memory = $a_memory - $d_memory;
-        echo("temps execution : {$time}, Memoire utlisé : {$memory}"); 
-
-        return view('relationentreprise')
-                ->with(compact('final_tab'))
-                ->with(compact('total_tab'))
-                ->with(compact('tableau_complet'))
-                ->with(compact('previs'))
-                ->with(compact('date'))
-                ->with(compact('periode_actuel'));
-
-    }
-
-
-
-
-//############################################################################
-//############################################################################
-//############################################################################
-
-
-    public function indexP(Request $request)
-    {   
-
-        //vider tous le cache
-        //Cache::flush();
-        ini_set('max_execution_time', 180);
-        ini_set('memory_limit', '512M' );
-        $d_microtime = microtime(true);
-        $d_memory = memory_get_usage(true);
-
-        
-        // Recuperation de la table periode et trouver la periode qui correspond a la date voulu (date du jour par defaut) ainsi que la periode n-1
-        //##############################################################"
-        
-
-            $date_du_jour = date_create_from_format('d/m/Y', date("d/m/Y") );
-            $date_annee_precedente = date_create_from_format('d/m/Y', date("d/m/Y") )->modify('-1 year');
-            $date_annee_suivante = date_create_from_format('d/m/Y', date("d/m/Y") )->modify('+1 year');
-
-        //Requete api
-        $api_data_periodes = $this->ApiPeriodes();
-
-        foreach ($api_data_periodes as $periode) {
-
-            $dateDeb = date_create_from_format('d/m/Y', $periode["dateDeb"] );
-            $dateFin = date_create_from_format('d/m/Y', $periode["dateFin"] );
-
-            if ($dateDeb <= $date_du_jour && $date_du_jour < $dateFin) {
-                $code_periode_actuel = $periode["codePeriode"];
-                $periode_actuel = $periode["nomPeriode"];
-            }
-
-            //preiode precedentes
-            if ($dateDeb <= $date_annee_precedente && $date_annee_precedente < $dateFin) {
-                $code_periode_precedente = $periode["codePeriode"];
-            }
-
-            //preiode avenir
-            if ($dateDeb <= $date_annee_suivante && $date_annee_suivante < $dateFin) {
-                $code_periode_suivante = $periode["codePeriode"];
-            }
-            
-        }
-
-
-        if(!isset($code_periode_actuel)){
-            return redirect()->route('relation_entreprise_index')->with('flash_message', "La date correspond a une periode qui n'existe pas encore")
-            ->with('flash_type', 'alert-danger');
-        }
-
-        $previs = \App\Models\Previ::where('periode', $periode_actuel)->get();
-
-        $periode_actuel_cache = Cache::get('periode_actuel_cache');
-        if($periode_actuel == $periode_actuel_cache){
-            echo("***********cache periode***");
-            $tableau_complet = Cache::get('tableau_complet_actuel');
-            $final_tab = Cache::get('final_tab_actuel');
-            $total_tab = Cache::get('total_tab_actuel');  
-
-            if (!empty($tableau_complet) && !empty($final_tab) && !empty($total_tab)) {
-         
-                echo("***cache periode non vide***********");
                 return view('relationentreprise')
                 ->with(compact('final_tab'))
                 ->with(compact('total_tab'))
@@ -320,7 +128,7 @@ class RelationEntrepriseController extends Controller
         //#############################################################
         //#############################################################
 
-        /* 
+/* 
         $date_tab =0;
         $date_tab = $request->session()->get('date_flash');
   
@@ -342,8 +150,11 @@ class RelationEntrepriseController extends Controller
 
         
         // Fin calcul Periode
-   
+
+
+      
         $apprenants_tab = $this->ApprenantsTab($date_du_jour,$code_periode_actuel,$code_periode_precedente, $frequente_tab);
+
 
 
         //##Recupere la table des prospects voulu##
@@ -353,6 +164,16 @@ class RelationEntrepriseController extends Controller
         $prospects_tab = $this->ProspectsTab($code_periode_actuel, $date_debut_prospect, $date_fin_prospect, $frequente_tab);
         //##
 
+
+
+/*         foreach ($prospects_tab as $key => $prospect) {
+            if (empty($prospect['nomAnnee'])) {
+                $null_tab[$key] = array(
+                    "codeApprenant" =>$key,
+                );
+            }
+        }
+        dd($null_tab); */
 
         if (isset($prospects_tab) && isset($apprenants_tab)) {
             $tableau_complet = array_merge($prospects_tab, $apprenants_tab);
@@ -380,10 +201,9 @@ class RelationEntrepriseController extends Controller
         // mise en cache tableau complet, final_tab et total_tab dans le cas ou la date est vide et donc on prend la date du jour
         if(isset($date_vide)){
             echo('sesesese  set date vide seseseeseees');
-            Cache::put('periode_actuel_cache', $periode_actuel, 32000);
-            Cache::put('final_tab_actuel', $final_tab, 32000);
-            Cache::put('total_tab_actuel', $total_tab, 32000);
-            Cache::put('tableau_complet_actuel', $tableau_complet, 32000);
+            Cache::put('final_tab_date_vide', $final_tab, 32000);
+            Cache::put('total_tab_date_vide', $total_tab, 32000);
+            Cache::put('tableau_complet_date_vide', $tableau_complet, 32000);
         }
 
 
@@ -405,6 +225,7 @@ class RelationEntrepriseController extends Controller
                 ->with(compact('periode_actuel'));
 
     }
+
 
     public function ConstructionTableauFinal($tableau_complet)
     {
@@ -564,19 +385,19 @@ class RelationEntrepriseController extends Controller
                         //Construction du tableau prsopects
                         //Attention certain prospect on plusieur formation souhaite pour l'instant on prend la premiere
                         $prospects_tab[$prospect["codeApprenant"]] = array(
-                            "nomApprenant" => $prospect["nomApprenant"],
-                            "prenomApprenant" => $prospect["prenomApprenant"],
+                            "codeEtapeEvenement" => $dernier_evenement_racine["dernierEvenement"]["codeEtapeEvenement"],
+                            "nomEtapeEvenement" => $dernier_evenement_racine["dernierEvenement"]["nomEtapeEvenement"],
                             "nomFormation" => $dernier_evenement_racine["formationsSouhaitees"][0]["nomFormation"],
                             "nomAnnee" => $dernier_evenement_racine["formationsSouhaitees"][0]["nomAnnee"],
                             "nomStatut" => $dernier_evenement_racine["formationsSouhaitees"][0]["nomStatut"],
-                            "codeEtapeEvenement" => $dernier_evenement_racine["dernierEvenement"]["codeEtapeEvenement"],
-                            "nomEtapeEvenement" => $dernier_evenement_racine["dernierEvenement"]["nomEtapeEvenement"],
-
+                            "nomApprenant" => $prospect["nomApprenant"],
+                            "prenomApprenant" => $prospect["prenomApprenant"]
                         );
                     }
                 }
             }
-    
+
+                     
         }
 
         if (isset($prospects_tab)) {
@@ -696,13 +517,16 @@ class RelationEntrepriseController extends Controller
                     }           
                 }
 
+                $apprenants_tab[$apprenant["codeApprenant"]] = array(
+                    "nomApprenant" => $apprenant["nomApprenant"],
+                    "prenomApprenant" => $apprenant["prenomApprenant"],
+                    "dateCreation" => $apprenant["dateCreation"],
+                    "nouveau" => $nouveau,
+                );
 
                 for ($i=0; $i < count($apprenant["inscriptions"]) ; $i++) { 
                     if ($apprenant["inscriptions"][$i]["isInscriptionEnCours"] == 1) {
-                        $apprenants_tab[$apprenant["codeApprenant"]] = array(
-                            "nomApprenant" => $apprenant["nomApprenant"],
-                            "prenomApprenant" => $apprenant["prenomApprenant"],
-                            "nouveau" => $nouveau,
+                        $apprenants_tab[$apprenant["codeApprenant"]] += array(
                             "nomStatut" => $apprenant["inscriptions"][$i]["situation"]["nomStatut"],
                             "nomAnnee" => $apprenant["inscriptions"][$i]["situation"]["nomAnnee"],
                             "nomFormation" => $apprenant["inscriptions"][$i]["formation"]["nomFormation"],
@@ -768,57 +592,6 @@ class RelationEntrepriseController extends Controller
 
     }
 
-    public function Erreur($tableau_complet)
-    {
-
-        $formations = \App\Models\Formations::all();
-        
-        $liste_annee_null = [];
-        $liste_annee_mauvaise = [];
-        foreach ($tableau_complet as $codeApprenant => $individu) {
-
-
-
-            $pas_bonne_annee = True;
-            foreach ($formations as $formation) {
-                if($individu['nomFormation'] == $formation["nomFormation"]  && $individu["nomAnnee"] == $formation["nomAnnee"]){
-                    $pas_bonne_annee = False;
-                }
-            }
-
-            if ($pas_bonne_annee) {
-                if(empty($individu["nomAnnee"])){
-                    array_push($liste_annee_null, $codeApprenant);
-                    
-                }  else {
-                    if ($individu["nomFormation"] !='ERASMUS POST-APPRENTISSAGE') {
-                        array_push($liste_annee_mauvaise, $codeApprenant);
-                    }
-                    
-                }
-            }
-
-
-
-        }
-
-        dump( $tableau_complet);
-        dump( $liste_annee_mauvaise);
-        dd( $liste_annee_null);
-        
-
-        return array('liste_annee_mauvaise' => $liste_annee_mauvaise,
-                    'liste_annee_null' => $liste_annee_null
-                    );
-
-    }
-
-
-
-
-
-
-
 
     public function test($code_periode_actuel, $date_annee_precedente, $date_du_jour, $frequente_tab)
     {
@@ -860,8 +633,8 @@ class RelationEntrepriseController extends Controller
                   'prenomApprenant' => 'Rakib',
                   'dateCreation' => '20/04/2021',
                   'nomStatut' => 'Apprenti',
-                  'nomAnnee' => '1ème année',
-                  'nomFormation' => 'CAP PRODUCTION ',
+                  'nomAnnee' => '2ème année',
+                  'nomFormation' => 'CAP PRODUCTION SERVICE RESTAURATION',
                   'nomSecteurActivite' => 'HOTELLERIE RESTAURATION',
 
                 ),
@@ -872,19 +645,16 @@ class RelationEntrepriseController extends Controller
                   'dateCreation' => '25/08/2021',
                   'nouveau' => 0,
                   'nomStatut' => 'Apprenti',
-                  'nomAnnee' => '1ème année',
+                  'nomAnnee' => '2ème année',
                   'nomFormation' => 'BTS MCO APP',
                   'nomSecteurActivite' => 'COMMERCE - VENTE',
                   'dateDebContrat' => '06/09/2021',
                   'nomEntreprise' => 'GREENSUB',
                 )
                 );
-                /* 
-                dump($tab1);
-                dump($tab2);
+                //dump($tab1);
         $tab = array_merge($tab1, $tab2);
-        $tab = $tab2 +$tab1;
-        dd($tab); */
+        //dd($tab);
 
 
        
@@ -929,56 +699,20 @@ class RelationEntrepriseController extends Controller
         //dump($prospects_tab);
 
         $count= 0;
-        $liste_prospect_contrat = [];
-        foreach ($prospects_tab as $codeApprenant => $prospect) {
-            if (!empty($contrats_tab[$codeApprenant])) {
+        foreach ($prospects_tab as $code => $prospect) {
+            if (!empty($contrats_tab[$code])) {
                   $count++;
-                  array_push($liste_prospect_contrat, $codeApprenant);
             }
         } 
 
         echo("nombre de prsopect avec contrat");
         dump($count);
-
-        $api_data_apprenants = Cache::get('api_data_apprenants');
-        $api_data_prospects = Cache::get('api_data_prospects');
-        $count= 0;
-        foreach ($liste_prospect_contrat as $codeApprenant) {
-            
-            foreach ($api_data_apprenants as $apprenant) {          
-                if ($apprenant["codeApprenant"] == $codeApprenant) {
-                    $count++; 
-                    echo("apprenant: $codeApprenant");   
-                    //dump($apprenant);   
-                }   
-            }
-
-            foreach ($api_data_prospects as $prospect) {
-    
-                if ($prospect["codeApprenant"] ==  $codeApprenant ){  
-                    echo("prospect: $codeApprenant");          
-                    //dump($prospect);
-                }
-            }
-
-        }
-        echo("nombre de prospect avec contrat aussi appreant");
-        dump($count);
-
-
-        $this->testfrequantation($prospects_tab);
-
-
-
-
-
-        exit;
     
         //exit;
         //#########################################################################
         //code contrat recu prosopect date debut formation ?
         $code=600532; 
-        /*      $url = "https://citeformations.ymag.cloud/index.php/r/v1/apprenants/600532";
+/*      $url = "https://citeformations.ymag.cloud/index.php/r/v1/apprenants/600532";
         $test = $this->ApiCall($url);
         dd($test); */
         //code formation voulu 524017
@@ -1014,7 +748,7 @@ class RelationEntrepriseController extends Controller
        
 
         //code classe terminal dans frequentation
-        /*    $code = ;
+/*         $code = ;
         $url = "https://citeformations.ymag.cloud/index.php/r/v1/apprenants/1068605";
         $test = $this->ApiCall($url);
         dd($test); */
@@ -1073,12 +807,15 @@ class RelationEntrepriseController extends Controller
         }   
 
 
+
+
+
         $api_data_prospects = Cache::get('api_data_prospects');
 
         foreach ($api_data_prospects as $prospect) {
 
             if ($prospect["codeApprenant"] ==  $code ){  
-                echo("prospect: $code");          
+                echo('prospect');          
                 dump($prospect);
             }
         }
@@ -1171,7 +908,7 @@ class RelationEntrepriseController extends Controller
         //$api_data_apprenants = Cache::get('api_data_apprenants_precedent');
         foreach ($api_data_apprenants as $apprenant) {
             
-            //si l'apprenant et dans la table prsopect
+            //si l'apprenant et dans la table de frequentation
             if (!empty( $prospects_tab_test[$apprenant["codeApprenant"]])) {    
 
 
@@ -1193,6 +930,8 @@ class RelationEntrepriseController extends Controller
                 }
 
 
+
+
             }
         }
         dump($prospects_tab_test);
@@ -1204,174 +943,4 @@ class RelationEntrepriseController extends Controller
         //####################################################
         //#########################################################################
     }
-
-
-    public function testCommun($apprenants_tab, $prospects_tab)
-    {
-
-        $liste_commun =[];
-        $liste_commun_comp=[];
-        foreach ($apprenants_tab as $codeApprenant => $apprenants) {
-            if(!empty($prospects_tab[$codeApprenant])){
-                array_push($liste_commun, $codeApprenant);
-                array_push($liste_commun_comp,
-                        array(
-                            $codeApprenant,
-                            'apprenant' => $apprenants, 
-                            'prospect' => $prospects_tab[$codeApprenant]
-                        ) 
-                );
-
-            }
-
-        }
-        echo('apprenant a la fois  dans prospects_tab et apprenants_tab ');
-        dump($liste_commun_comp);
-        exit;
-
-
-        $api_data_apprenants = Cache::get('api_data_apprenants');
-        $api_data_prospects = Cache::get('api_data_prospects');
-
-        foreach ($liste_commun as $codeApprenant) {
-            
-            foreach ($api_data_apprenants as $apprenant) {          
-                if ($apprenant["codeApprenant"] == $codeApprenant) { 
-                    echo("apprenant: $codeApprenant");   
-                    dump($apprenant);   
-                }   
-            }
-
-            foreach ($api_data_prospects as $prospect) {
-    
-                if ($prospect["codeApprenant"] ==  $codeApprenant ){  
-                    echo("prospect: $codeApprenant");          
-                    dump($prospect);
-                }
-            }
-
-            echo("##############################");
-
-        }
-        echo("FIN RESULTAT COMMUN");
-        exit;
-    }
-
-    public function testfrequantation($prospects_tab)
-    {
-
-        $api_data_apprenants = Cache::get('api_data_apprenants');
-        $api_data_prospects = Cache::get('api_data_prospects');
-        $api_data_frequentes = Cache::get('api_data_frequentes');
-
-        foreach ($api_data_frequentes as $frequente) {
-                $frequente_tab_netoyer[$frequente["codeApprenant"]] = array(
-                    "codeApprenant" => $frequente["codeApprenant"],
-                );
-        }
-
-        $count = 0;
-        $count_freq = 0;  
-        foreach ($api_data_apprenants as $apprenant) {
-                    
-            if (empty($frequente_tab_netoyer[$apprenant["codeApprenant"]])) {     
-                $count_freq++;
-                //dump($apprenant);
-                //si l'apprenant et dans la table de frequentation
-                if (!empty($prospects_tab[$apprenant["codeApprenant"]])) {     
-                    $count++;
-                }
-   
-            }
-
-        }
-        echo("dans la table apprenant mais pas dans la table frequente");
-        dump($count_freq);
-        echo("dans la table prospect et apprenant pas dans la table frequente");
-        dump($count);
-
-        $count = 0;
-        $liste_commun = [];
-        foreach ($prospects_tab as $codeApprenant => $prospect) {
-            if (!empty($frequente_tab_netoyer[$codeApprenant])) {     
-               
-                $count++;
-                array_push($liste_commun, $codeApprenant);
-   
-            }
-        }
-        
-        echo("dans la table prospect et dans la table frequente");
-        dump($count);
-        dump($liste_commun);
-
-
-
-        foreach ($liste_commun as $codeApprenant) {
-            
-            foreach ($api_data_apprenants as $apprenant) {          
-                if ($apprenant["codeApprenant"] == $codeApprenant) { 
-                    echo("apprenant: $codeApprenant");   
-                    dump($apprenant);   
-                }   
-            }
-
-            foreach ($api_data_prospects as $prospect) {
-    
-                if ($prospect["codeApprenant"] ==  $codeApprenant ){  
-                    echo("prospect: $codeApprenant");          
-                    dump($prospect);
-                }
-            }
-        }
-
-
-        exit;
-    }
-
-    public function frequentUnique()
-    {
-        
-        $api_data_apprenants = Cache::get('api_data_apprenants');
-        $api_data_prospects = Cache::get('api_data_prospects');
-        $api_data_frequentes = Cache::get('api_data_frequentes');
-
-        $count = 0;
-        $frequente_tab=[];
-        $freq2=[];
-        foreach ($api_data_frequentes as $frequente) {
-            Array_push($freq2, $frequente["codeApprenant"] );
-
-                $frequente_tab[$frequente["codeApprenant"]] = array(
-                    "codeApprenant" => $frequente["codeApprenant"],
-                );
-                $count++;
-                
-                if ($frequente["codeApprenant"] == 530254) {
-                    dump($frequente);
-                }
-            
-        }
-
-        dump($count);
-        //dump($frequente_tab);
-        dump($freq2);
-        dump(array_count_values($freq2));
-
-        $unique = array_map("unserialize", array_unique(array_map("serialize", $frequente_tab)));
-         //dump($unique);
-
-        $codeApprenant = 530254;
-        foreach ($api_data_apprenants as $apprenant) {          
-            if ($apprenant["codeApprenant"] == $codeApprenant) { 
-                echo("apprenant: $codeApprenant");   
-                dump($apprenant);   
-            }   
-        }
-       
-        exit;
-
-    }
-
-
-}//fin class
+}

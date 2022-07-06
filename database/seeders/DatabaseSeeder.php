@@ -19,18 +19,7 @@ class DatabaseSeeder extends Seeder
         
         //DB::table('formations')->delete();
 
-        $data = [array (
-            'nomSecteurActivite' => 'ASCENSEURS',
-            'nomFormation' => 'TP TECHNICIEN DE TRAVAUX SUR ASCENSEUR',
-            'nomAnnee' => '1ère année',
-            'capaciteMax' => 40,
-          ),
-          array (
-            'nomSecteurActivite' => 'ASCENSEURS',
-            'nomFormation' => 'TP TECHNICIEN DE TRAVAUX SUR ASCENSEUR',
-            'nomAnnee' => '2ème année',
-            'capaciteMax' => 0,
-          ),];
+ 
 
           $data = $this->TableauFormation();
           foreach($data as $formation){
@@ -150,7 +139,7 @@ class DatabaseSeeder extends Seeder
         ),
         array (
             'nomSecteurActivite' => 'COMMERCE - VENTE',
-            'nomFormation' => 'BAC PRO COMMERCE VENTE OPT A',
+            'nomFormation' => 'BAC PRO COMMERCE VENTE OPT B',
             'nomAnnee' => 'Seconde',
             'capaciteMax' => 20,
           ), 

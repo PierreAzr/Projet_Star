@@ -5,62 +5,65 @@
 
 @section('content')
 
-<h1 class="center">Effectif periode {{ $periode_actuel }}</h1>
+<h1 class="center">Effectifs sur la période {{ $periode_actuel }}</h1>
 <br>
 
 <br>
 <div class="row">
-<div class="col-3 d-inline-flex justify-content-end">
-
-    <div>
-
-    <div class="d-flex p-2 bg-Secondary text-white">{{ $periode_actuel }}</div>  
-
-    </div>
-    <div class="d-flex p-2"></div>
-    <div>
-    @php($date_format = date_create_from_format('Y-m-d', $date )->format('d-m-Y'))
-    <div class="d-flex p-2 bg-Secondary text-white">{{ $date_format }}</div> 
-    
-
-    </div>
-    
-</div >
-<div class="col-2 d-flex justify-content-center">
-    <form method="get" action="{{ route('relation_entreprise_index') }}">
-        <div class="input-group mb-3">
-            @php($date_min = date('Y-m-d'))
-            <input type="date" class="form-control"  min="{{ $date_min }}"  name="date" value="{{ $date }}">
-            <button class="btn btn-primary" type="submit">Go</button>
+    <div class="col-3 d-inline-flex justify-content-end">
+        <div>
+            <div class="d-flex p-2 bg-Secondary text-white">{{ $periode_actuel }}</div>  
         </div>
-    </form>
-</div>
-<div class="col-3 d-flex justify-content-center">
-    <div>
-    <button type="button" class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#modalprevis">Enregistrer Previs</button>
-    </div>
-    
-</div>
-<div class="col-2 d-flex justify-content-center">
+        <div>
+            @php($date_format = date_create_from_format('Y-m-d', $date )->format('d-m-Y'))
+            <div class="d-flex p-2 ms-2 bg-Secondary text-white">{{ $date_format }}</div> 
+        </div>   
+    </div >
 
-   
-    <br>
-</div>
+    <div class="col-2 d-flex justify-content-center">
+        <form method="get" action="{{ route('relation_entreprise_index') }}">
+            <div class="input-group mb-3">
+                @php($date_min = date('Y-m-d'))
+                <input type="date" class="form-control"  min="{{ $date_min }}"  name="date" value="{{ $date }}">
+                <button class="btn btn-primary" type="submit">Go</button>
+            </div>
+        </form>
+    </div>
+
+    <div class="col-3 d-flex justify-content-center">
+        <div>
+            <button type="button" class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#modalprevis">Enregistrer Previs</button>
+        </div>
+    </div>
+
+    <div class="col-2 d-flex justify-content-center">
+        <br>
+    </div>
 </div>
 <hr>
 
-<div>
-
-
+<div class="row mb-10">
+    <div class="col-12 mb-10 d-inline-flex justify-content-center">
    
+            <div class="d-flex p-2 bg-Secondary text-white">Envoi pré contrat : {{ $total_tab["precontrat"] }}</div>  
+            <div class="d-flex p-2 ms-2 bg-Secondary text-white">Reception pré contrat : {{ $total_tab["receptioncontrat"] }}</div>
+            <div class="d-flex p-2 ms-2 bg-Secondary text-white">Contrat recu : {{ $total_tab["contratrecu"] }}</div>
+            <div class="d-flex p-2 ms-2 bg-Secondary text-white">Nouveau inscrit : {{ $total_tab["nouveau"] }}</div>
+            <div class="d-flex p-2 ms-2 bg-Secondary text-white">inscrit N-1 : {{ $total_tab["ancient"] }}</div>
+            <div class="d-flex p-2 ms-2 bg-Secondary text-white">Total : {{ $total_tab["total"] }}</div> 
+
+    </div>
+</div>
+
+
+
 
 <div class="row">
-
 <form name="previs_save" id="previs_save" action="{{ route('previs_save_database') }}" method="POST">
     @csrf
     <input id="prodId" name="periode" type="hidden" value="{{ $periode_actuel }}">
     <input id="prodId2" name="date" type="hidden" value="{{ $date }}">
-    
+    <br>
     <table id="table_id" class="display">
         <thead>
             <tr>
@@ -82,7 +85,7 @@
         </thead> 
         <tbody>
             <tr>         
-                <td>TOTAL</td>
+                <td>*TOTAL</td>
                 <td></td>
                 <td></td>
                 <td>{{ $total_tab["precontrat"] }}</td>
@@ -98,19 +101,19 @@
                 <td></td>
             </tr>
             @foreach ($final_tab as $formation)
-            <tr>
-                <td>{{ $formation["nomSecteurActivite"] }}</td>
-                <td>{{ $formation["nomFormation"] }}</td>
-                <td>{{ $formation["nomAnnee"] }}</td>
-                <td>{{ $formation["precontrat"] }}</td>
-                <td>{{ $formation["receptioncontrat"] }}</td>
-                <td>{{ $formation["contratrecu"] }}</td>
-                <td>{{ $formation["nouveau"] }}</td>
-                <td>{{ $formation["ancient"] }}</td>
-                <td>{{ $formation["total"] }}</td>
-                <td>{{ $formation["capaciteMax"] }}</td>
-                <td>{{ $formation["nbPlacePossible"] }}</td>
-                <td>
+            <tr> 
+                <td class="" style='background-color:  #a2d9ce '>{{ $formation["nomSecteurActivite"] }}</td>
+                <td style='background-color:  #a2d9ce '>{{ $formation["nomFormation"] }}</td>
+                <td style='background-color:  #a2d9ce '>{{ $formation["nomAnnee"] }}</td>
+                <td style='background-color:  #e8f6f3  '>{{ $formation["precontrat"] }}</td>
+                <td style='background-color:  #e8f6f3 '>{{ $formation["receptioncontrat"] }}</td>
+                <td style='background-color:  #e8f6f3 '>{{ $formation["contratrecu"] }}</td>
+                <td style='background-color:   #d0ece7'>{{ $formation["nouveau"] }}</td>
+                <td style='background-color:  #d0ece7 '>{{ $formation["ancient"] }}</td>
+                <td style='background-color:  #a2d9ce '>{{ $formation["total"] }}</td>
+                <td style='background-color: #fdedec'>{{ $formation["capaciteMax"] }}</td>
+                <td style='background-color: #f5b7b1'>{{ $formation["nbPlacePossible"] }}</td>
+                <td style='background-color:  #fcf3cf '>
                 @php($previ_total = null )
                 @foreach($previs as $previ)
                     @if($previ->periode == $periode_actuel && $previ->idFormation == $formation['idFormation'])
@@ -123,10 +126,10 @@
                     @php($previ_total = $formation["total"])
                 @endif
                 </td>
-                <td>                          
+                <td style='background-color:   #f9e79f  '>                          
                     {{ $previ_total }}
                 </td>
-                <td>
+                <td  style='background-color: ' >
                 
 
                     <!-- Button trigger modal -->
@@ -217,22 +220,6 @@
                 </td>   
             </tr>
             @endforeach
-            <tr>         
-                <td>*TOTAL</td>
-                <td></td>
-                <td></td>
-                <td>{{ $total_tab["precontrat"] }}</td>
-                <td>{{ $total_tab["receptioncontrat"] }}</td>
-                <td>{{ $total_tab["contratrecu"] }}</td>
-                <td>{{ $total_tab["nouveau"] }}</td>
-                <td>{{ $total_tab["ancient"] }}</td>
-                <td>{{ $total_tab["total"] }}</td>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td></td>
-            </tr>
         </tbody>
     </table> 
 
@@ -276,6 +263,7 @@
                     url: 'http:////cdn.datatables.net/plug-ins/1.12.1/i18n/fr-FR.json'
                 },
                 lengthMenu: [ [-1, 10, 25 ], ["Tous", 10, 25  ] ],
+
                 
             });
 
