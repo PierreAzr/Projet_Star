@@ -161,7 +161,7 @@ trait ApiRequestTrait {
 
 
     // ****CONTRATS
-    protected function Apicontrats($code_periode=null)
+    protected function Apicontrats($code_periode = null)
     {  
         $api_data_contrats = Cache::get('api_data_contrats');
         //$api_data_contrats = null;
@@ -178,8 +178,8 @@ trait ApiRequestTrait {
     protected function ApiEntreprises()
     {
         
-       // $api_data_entreprises = Cache::get('api_data_entreprises');
-        $api_data_entreprises = null;
+        $api_data_entreprises = Cache::get('api_data_entreprises');
+        //$api_data_entreprises = null;
         if (empty($api_data_entreprises)) {
             $url = "https://citeformations.ymag.cloud/index.php/r/v1/entreprises";
             $api_data_entreprises = $this->ApiCall($url);
@@ -193,7 +193,7 @@ trait ApiRequestTrait {
     {
         
         $api_data_groupes = Cache::get('api_data_groupes');
-        //$api_data_groupes = null;
+        $api_data_groupes = null;
         if (empty($api_data_groupes)) {
             $url = "https://citeformations.ymag.cloud/index.php/r/v1/formation-longue/groupes?codesPeriode=".$code_periode;
             $api_data_groupes = $this->ApiCall($url);

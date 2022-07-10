@@ -25,7 +25,6 @@
         @section('sidebar')
     <header >
 
-
             <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
             <div class="container-fluid">
             <a class="navbar-brand" href="{{ route('Welcome') }}">Star</a>
@@ -60,11 +59,8 @@
         </nav>
 
     </header>
-  
 
-
-        @show
-        
+        @show  
         <div class="container">
             <div class="mx-auto">
             <br>
@@ -79,12 +75,12 @@
         <div class="container">
             <br>
             @yield('content')
-                       
+                
         </div>
     </body>
     <script>
         $("document").ready(function(){
-                    setTimeout(function(){ $("div.alert").remove(); }, 5000 ); // 5 secs
+                    setTimeout(function(){ $("div.alert").remove(); }, 10000 ); // 10 secs
 
          });
     </script>

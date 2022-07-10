@@ -45,9 +45,9 @@
 <div class="row mb-10">
     <div class="col-12 mb-10 d-inline-flex justify-content-center">
    
-            <div class="d-flex p-2 bg-Secondary text-white">Envoi pré contrat : {{ $total_tab["preContrat"] }}</div>  
-            <div class="d-flex p-2 ms-2 bg-Secondary text-white">Reception pré contrat : {{ $total_tab["receptionContrat"] }}</div>
-            <div class="d-flex p-2 ms-2 bg-Secondary text-white">Contrat recu : {{ $total_tab["contratRecu"] }}</div>
+            <div class="d-flex p-2 bg-Secondary text-white">Envoi pré contrat : {{ $total_tab["precontrat"] }}</div>  
+            <div class="d-flex p-2 ms-2 bg-Secondary text-white">Reception pré contrat : {{ $total_tab["receptioncontrat"] }}</div>
+            <div class="d-flex p-2 ms-2 bg-Secondary text-white">Contrat recu : {{ $total_tab["contratrecu"] }}</div>
             <div class="d-flex p-2 ms-2 bg-Secondary text-white">Nouveau inscrit : {{ $total_tab["nouveau"] }}</div>
             <div class="d-flex p-2 ms-2 bg-Secondary text-white">inscrit N-1 : {{ $total_tab["ancient"] }}</div>
             <div class="d-flex p-2 ms-2 bg-Secondary text-white">Total : {{ $total_tab["total"] }}</div> 
@@ -88,9 +88,9 @@
                 <td>*TOTAL</td>
                 <td></td>
                 <td></td>
-                <td>{{ $total_tab["preContrat"] }}</td>
-                <td>{{ $total_tab["receptionContrat"] }}</td>
-                <td>{{ $total_tab["contratRecu"] }}</td>
+                <td>{{ $total_tab["precontrat"] }}</td>
+                <td>{{ $total_tab["receptioncontrat"] }}</td>
+                <td>{{ $total_tab["contratrecu"] }}</td>
                 <td>{{ $total_tab["nouveau"] }}</td>
                 <td>{{ $total_tab["ancient"] }}</td>
                 <td>{{ $total_tab["total"] }}</td>
@@ -105,22 +105,30 @@
                 <td class="" style='background-color:   #aed6f1 '>{{ $formation["nomSecteurActivite"] }}</td>
                 <td style='background-color:   #aed6f1 '>{{ $formation["nomFormation"] }}</td>
                 <td style='background-color:   #aed6f1 '>{{ $formation["nomAnnee"] }}</td>
-                <td style='background-color:   #ebf5fb   '>{{ $formation["preContrat"] }}</td>
-                <td style='background-color:   #ebf5fb  '>{{ $formation["receptionContrat"] }}</td>
-                <td style='background-color:   #ebf5fb  '>{{ $formation["contratRecu"] }}</td>
+                <td style='background-color:   #ebf5fb   '>{{ $formation["precontrat"] }}</td>
+                <td style='background-color:   #ebf5fb  '>{{ $formation["receptioncontrat"] }}</td>
+                <td style='background-color:   #ebf5fb  '>{{ $formation["contratrecu"] }}</td>
                 <td style='background-color:    #d6eaf8'>{{ $formation["nouveau"] }}</td>
                 <td style='background-color:   #d6eaf8 '>{{ $formation["ancient"] }}</td>
                 <td style='background-color:   #aed6f1 '>{{ $formation["total"] }}</td>
                 <td style='background-color: #fdedec'>{{ $formation["capaciteMax"] }}</td>
                 <td style='background-color: #f5b7b1'>{{ $formation["nbPlacePossible"] }}</td>
-                <td style='background-color:  #fcf3cf '>             
-                    @if(!empty($formation["previ"]))
-                        <input size="1" type="text" name="{{ $formation['idFormation'] }}" id="{{ $formation['idFormation'] }}" value='{{ $formation["previ"] }}'>
-                    @else
-                        <input size="1" type="text" name="{{ $formation['idFormation'] }}" id="{{ $formation['idFormation'] }}" value='0'>    
+                <td style='background-color:  #fcf3cf '>
+                @php($previ_total = null )
+                @foreach($previs as $previ)
+                    @if($previ->periode == $periode_actuel && $previ->idFormation == $formation['idFormation'])
+                        <input size="1" type="text" name="{{ $formation['idFormation'] }}" id="{{ $formation['idFormation'] }}" value='{{ $previ->previ }}'>
+                        @php($previ_total = $formation["total"] + $previ->previ )
                     @endif
+                @endforeach  
+                @if(!isset($previ_total)) 
+                    <input size="1" type="text" name="{{ $formation['idFormation'] }}" id="{{ $formation['idFormation'] }}" value='0'>
+                    @php($previ_total = $formation["total"])
+                @endif
                 </td>
-                <td style='background-color:   #f9e79f  '>{{ $formation["previTotal"] }}</td>
+                <td style='background-color:   #f9e79f  '>                          
+                    {{ $previ_total }}
+                </td>
                 <td  style='background-color: ' >
                 
 
