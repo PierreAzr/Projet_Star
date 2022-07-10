@@ -25,6 +25,17 @@ class DatabaseSeeder extends Seeder
           foreach($data as $formation){
             \App\Models\Formations::create($formation);
         }
+
+        DB::table('users')->insert([
+          'name' => 'user',
+          'email' => 'user1@email.com',
+          'password' => bcrypt('password'),
+        ]);
+        DB::table('users')->insert([
+            'name' => 'admin',
+            'email' => 'admin@email.com',
+            'password' => bcrypt('admin'),
+        ]);
         
     }
 

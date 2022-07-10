@@ -9,7 +9,17 @@
 <br>
 
 <br>
+<!--Information, Choix date, Enregistrement previs -->
 <div class="row">
+    <div class="col-3 d-flex justify-content-center">
+        <div>
+        @if(isset($erreur))
+        <a href="#erreur">
+        <button class="btn btn-outline-danger" >Plusieurs Erreurs cliquez pour voir</button>
+        </a>
+        @endif
+        </div>
+    </div>
     <div class="col-3 d-inline-flex justify-content-end">
         <div>
             <div class="d-flex p-2 bg-Secondary text-white">{{ $periode_actuel }}</div>  
@@ -20,7 +30,8 @@
         </div>   
     </div >
 
-    <div class="col-2 d-flex justify-content-center">
+    <div class="col-3 d-flex justify-content-start">
+        <!--Debut Formulaire enregistrement-->
         <form method="get" action="{{ route('relation_entreprise_index') }}">
             <div class="input-group mb-3">
                 @php($date_min = date('Y-m-d'))
@@ -30,18 +41,20 @@
         </form>
     </div>
 
-    <div class="col-3 d-flex justify-content-center">
+    <div class="col-3 d-flex justify-content-start">
         <div>
             <button type="button" class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#modalprevis">Enregistrer Previs</button>
         </div>
     </div>
 
-    <div class="col-2 d-flex justify-content-center">
-        <br>
-    </div>
+ 
+
 </div>
+<!--Fin-->
+
 <hr>
 
+<!-- KPI Total -->
 <div class="row mb-10">
     <div class="col-12 mb-10 d-inline-flex justify-content-center">
    
@@ -54,11 +67,13 @@
 
     </div>
 </div>
+<!--Fin-->
 
 
-
-
+<!-- Tableau effectif -->
 <div class="row">
+        
+<!--Debut Formulaire enregistrement-->
 <form name="previs_save" id="previs_save" action="{{ route('previs_save_database') }}" method="POST">
     @csrf
     <input id="prodId" name="periode" type="hidden" value="{{ $periode_actuel }}">
@@ -122,13 +137,13 @@
                 </td>
                 <td style='background-color:   #f9e79f  '>{{ $formation["previTotal"] }}</td>
                 <td  style='background-color: ' >
-                
+                    <!-- Modal pour afficher le detail d'une formation -->
 
-                    <!-- Button trigger modal -->
+                    <!-- Button modal Detail-->
                     <button type="button" class="btn btn-outline-primary float-end" data-bs-toggle="modal" data-bs-target="#modal{{ $formation['idFormation'] }}"><i class="bi bi-search"></i></button>
 
 
-                    <!-- Modal -->
+                    <!-- Modal Detail-->
                     <div class="modal fade" id="modal{{ $formation['idFormation'] }}" tabindex="-1" aria-labelledby="modalprevis{{ $formation['idFormation'] }}Label" aria-hidden="true">
                         <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
                         <div class="modal-content">
@@ -194,7 +209,7 @@
                         </div>
                         </div>
                     </div>
-
+                     <!-- Sript datatable pour le detail d'une formation -->
                     <script>
                             $(document).ready( function () {
                                     $("#table_{{ $formation['idFormation'] }}").DataTable({
@@ -209,42 +224,110 @@
                                 } );
                     </script>
 
-                </td>   
+                </td> 
+                <!-- FIN Modal pour afficher le detail d'une formation --> 
             </tr>
             @endforeach
         </tbody>
     </table> 
-
-</div>
-
+    <br>
 
 
-
-<!-- Button trigger modal -->
-<button type="button" id="button_sub" class="btn btn-outline-primary float-end" data-bs-toggle="modal" data-bs-target="#modalprevis">Enregistrer Previs</button>
-
-
-<!-- Modal -->
-<div class="modal fade" id="modalprevis" tabindex="-1" aria-labelledby="modalprevisLabel" aria-hidden="true">
-    <div class="modal-dialog">
-    <div class="modal-content">
-        <div class="modal-header">
-            <h5 class="modal-title" id="modalprevisLabel">Enregistrer Previs</h5>
-            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-        </div>
-        <div class="modal-body">
-            Enregistrer les previsions
-        </div>
-        <div class="modal-footer">
-            <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Annuler</button>
-            <button id="button_submit" class="btn btn-outline-primary" type="submit">Comfirmer</button>
+    <!-- Button modal Enregistrement-->
+    <div class="col-12 d-flex justify-content-center">
+        <div>
+            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalprevis">Enregistrer Previs</button>
         </div>
     </div>
+  
+
+    <!-- Modal Enregistrement Formulaire -->
+    <div class="modal fade" id="modalprevis" tabindex="-1" aria-labelledby="modalprevisLabel" aria-hidden="true">
+        <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalprevisLabel">Enregistrer Previs</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+               <p>ATTENTION !!! Avant d'enregistrer les previsions.</p> 
+               <p>Veuiller a ce que :</p>
+                                <ul>
+                                <li>le nombre entrée soit sur "Tous"</li>
+                    <li>le champ rechercher soit vide</li>
+                    </ul>
+               
+               <p>L'enregistrement ne ce fait que sur le donnée que le tableau affiche.</p> 
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Annuler</button>
+                <button id="button_submit" class="btn btn-outline-primary" type="submit">Comfirmer</button>
+            </div>
+        </div>
+        </div>
     </div>
-</div>
 
 </form>
-           
+<!--Fin Formulaire enregistrement-->
+
+</div>
+<!--Fin Tableau effectifs-->
+
+<hr>
+
+<!-- Formation multiple et Erreur -->
+<div class="row">
+    <div class="">
+
+        <br>
+        <br>
+        @if(isset($prospects_plusieurs_formation))
+        <h2>Prospect avec plusieurs Formations :</h2>
+        <br>
+            <table class="table">
+                <tr>
+                    <th scope="col">Code Apprenant</th>
+                    <th scope="col">Formation dans le tableau</th>
+                </tr>
+            @foreach($prospects_plusieurs_formation as $key => $formation)
+                <tr>
+                    <td>{{ $key }}</td>
+                    <td>{{ $formation["nomFormation"] }} - {{ $formation["nomAnnee"] }}</td>
+                </tr>
+            @endforeach
+            </table>
+        @endif
+
+        <br>
+        @if(isset($erreur))
+
+        <h2 id="erreur">Erreur apprenant exclu du tableau :</h2>
+        <br>
+            <table class="table">
+                <tr>
+                    <th scope="col">Erreur</th>
+                    <th scope="col">Code Apprenant</th>
+                </tr>
+            @foreach($erreur as $key => $list)
+
+                <tr>
+                    <th scope="row">{{ $key }}</th>
+                    <td>
+                    @foreach($list as $key => $Apprenat)
+                        {{ $Apprenat }},
+                    @endforeach
+                    </td>
+
+                </tr>
+            @endforeach
+            </table>
+        @endif
+
+    </div>
+</div>
+
+
+
 <script>
     $(document).ready( function () {
         var table = $('#table_id').DataTable({
@@ -260,7 +343,7 @@
             });
 
 
-
+        //pour resoudre le probleme d'enregistrement du formulaire
         $('#previs_save').on('submit', function(e){
         var form = this;
 

@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 
 use App\Http\Controllers\RelationEntrepriseController;
 use App\Http\Controllers\WelcomeController;
+use App\Http\Controllers\MediationController;
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -28,4 +29,4 @@ Route::get('/', [WelcomeController::class, 'index'])->name('Welcome');
 Route::get('/r', [RelationEntrepriseController::class, 'index'])->name('relation_entreprise_index');
 Route::post('/r', [RelationEntrepriseController::class, 'PrevisDataBase'])->name('previs_save_database');
 
-Route::get('/RelationEntreprise', [RelationEntrepriseController::class, 'AffichageFormation'])->name('affichage_formation');
+Route::get('/RuptureContrat', [MediationController::class, 'RuptureContrat'])->name('rupture_contrat');

@@ -79,11 +79,10 @@ trait ApiRequestTrait {
     protected function ApiPeriodes()
     {
         $api_data_periodes = Cache::get('api_data_periodes');
-        //$api_data_periodes = null;
         if (empty($api_data_periodes)) {
             $url = "https://citeformations.ymag.cloud/index.php/r/v1/periodes";
             $api_data_periodes = $this->ApiCall($url);
-            Cache::put('api_data_periodes', $api_data_periodes, 32000);
+            Cache::put('api_data_periodes', $api_data_periodes, env('TEMP_CACHE_TRAIT') );
         }
 
         return  $api_data_periodes;
@@ -97,7 +96,7 @@ trait ApiRequestTrait {
         if (empty($api_data_formations)) {
             $url = "https://citeformations.ymag.cloud/index.php/r/v1/formations";
             $api_data_formations = $this->ApiCall($url);
-            Cache::put('api_data_formations', $api_data_formations, 32000);
+            Cache::put('api_data_formations', $api_data_formations, env('TEMP_CACHE_TRAIT'));
         }
 
         return  $api_data_formations;
@@ -183,7 +182,7 @@ trait ApiRequestTrait {
         if (empty($api_data_entreprises)) {
             $url = "https://citeformations.ymag.cloud/index.php/r/v1/entreprises";
             $api_data_entreprises = $this->ApiCall($url);
-            //Cache::put('api_data_entreprises', $api_data_entreprises, 32000);
+            Cache::put('api_data_entreprises', $api_data_entreprises, env('TEMP_CACHE_TRAIT'));
         }
         return $api_data_entreprises;
     }
