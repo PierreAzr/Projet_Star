@@ -1,6 +1,8 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Mediation;
+
+use App\Http\Controllers\Controller;
 
 use Illuminate\Http\Request;
 
@@ -19,13 +21,16 @@ class TableauEffectifsController extends Controller
 
     public $tab;
 
-    public function effectifs(Request $request)
+    public function Effectifs(Request $request)
     {   
 
+        $api_data_periodes = $this->ApiPeriodes();
+        exit;
         //date_default_timezone_set('Europe/Paris');
 
         //vider tous le cache
         //Cache::flush();
+
         ini_set('max_execution_time', 180);
         ini_set('memory_limit', '512M' );
         $d_microtime = microtime(true);
@@ -219,10 +224,8 @@ class TableauEffectifsController extends Controller
         $a_memory = memory_get_usage(true);
         $memory = $a_memory - $d_memory;
         echo("temps execution : {$time}, Memoire utlisé : {$memory}"); 
-        //dump($prospects_plusieurs_formation);
-        dd($erreur);
-        $erreur = null;
-        return view('mediation/relationentreprise')
+        
+        return view('mediation.tableaueffectifs')
                 ->with(compact('final_tab'))
                 ->with(compact('total_tab'))
                 ->with(compact('tableau_complet'))
@@ -344,7 +347,7 @@ class TableauEffectifsController extends Controller
         // /r/v1/formation-longue/prospects-with-events/@codeTypeEvt/@codeEtapeEvt/@dateDebut/@dateFin/@evtClotures
         // codeTypeEvt trouver avec la table typeEvenement https://citeformations.ymag.cloud/index.php/r/v1/types-evenement
         $api_data_prospect_evenement = $this->ApiProspectsEvenement($codeTypeEvt=4, $codeEvenement, $date_debut_prospect, $date_fin_prospect, $evtClotures=0);  
-
+        
         //tableau qui recupere seulement le code apprenant
         foreach ($api_data_prospect_evenement as $prospect) {
             $tab_data_prospect_evenement[$prospect["codeApprenant"]] = array(
@@ -389,7 +392,7 @@ class TableauEffectifsController extends Controller
             Cache::put('prospects_tab_envoi', $prospects_tab_envoi, env('TEMP_CACHE_CONTROLLER'));
         }
         
-
+        
         //Creation de la table prospects voulu
         $count = 0;
         $count2 = 0;
@@ -451,13 +454,18 @@ class TableauEffectifsController extends Controller
                     }else{
                         //653791
                         //etape information complementaire
-                        //dd($prospect);
+                        //dump($prospect);
                     }
                     
                 }
             }
     
         }
+/*         $prospects_tab_recu = $this->ProspectEvenement($codeEvenement=8);
+        dump($prospects_tab_envoi);
+        dump($prospects_tab_reception);
+        dump( $prospects_tab_recu );
+        exit; */
         //dd($prospects_tab);
         /* dump($count);
         dump($count2);
@@ -650,7 +658,7 @@ class TableauEffectifsController extends Controller
                         ['previ' => $value ]
                     );
                 }else {
-                    return redirect()->route('relation_entreprise_index', ['date' => $date])->with('flash_message', 'Erreur les champs doivent etre des nombres')
+                    return redirect()->route('mediation_tableau_effectifs', ['date' => $date])->with('flash_message', 'Erreur les champs doivent etre des nombres')
                     ->with('flash_type', 'alert-danger');
                 }
             }
@@ -660,7 +668,7 @@ class TableauEffectifsController extends Controller
 
         /* Session::flash('flash_message', '<b>Well done!</b> You successfully logged in to this website.');
         Session::flash('flash_type', 'alert-success'); */
-       return redirect()->route('relation_entreprise_index', ['date' => $date])->with('flash_message', 'Previsionel enregitrer')
+       return redirect()->route('mediation_tableau_effectifs', ['date' => $date])->with('flash_message', 'Previsionel enregitrer')
                                                     ->with('flash_type', 'alert-success');
 
     }
@@ -684,11 +692,11 @@ class TableauEffectifsController extends Controller
                     array_push($liste_annee_null, $individu["CodeApprenant"]);
                     
                 }  else {
-                    if ($individu["nomFormation"] =='ERASMUS POST-APPRENTISSAGE') {
+                    if ($individu["nomFormation"] !='ERASMUS POST-APPRENTISSAGE') {
                         array_push($liste_annee_mauvaise, $individu["CodeApprenant"]);
                     }else{
                         echo("erreur fonction annee de formation pas bon mais pas erasmus apprentisage");
-                        dd($individu);
+                        //dd($individu);
                     }
                     
                 }
@@ -702,13 +710,17 @@ class TableauEffectifsController extends Controller
         //dump( $liste_annee_mauvaise);
         //dd( $liste_annee_null);
         
+        if (!empty($liste_annee_mauvaise) && !empty($liste_annee_null)) {
+            return array('liste_annee_mauvaise' => $liste_annee_mauvaise,
+            'liste_annee_null' => $liste_annee_null
+            );
+        }else {
+            return  null;
+        } 
 
-        return array('liste_annee_mauvaise' => $liste_annee_mauvaise,
-                    'liste_annee_null' => $liste_annee_null
-                    );
+
 
     }
-
 
 
 

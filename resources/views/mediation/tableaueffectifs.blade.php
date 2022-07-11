@@ -1,24 +1,21 @@
 
 @extends('layout')
 
-@section('title', 'Relation Entreprise Tableau')
+@section('title', 'Tableau Effectifs')
 
 @section('content')
+<div class="row mb-5">
+<h2 class="text-center fw-bold">Effectifs sur la période {{ $periode_actuel }}</h2>
+</div>
 
-<h1 class="center">Effectifs sur la période {{ $periode_actuel }}</h1>
-<br>
-
-<br>
 <!--Information, Choix date, Enregistrement previs -->
 <div class="row">
     <div class="col-3 d-flex justify-content-center">
-        <div>
-        @if(isset($erreur))
+        @if(!empty($erreur))
         <a href="#erreur">
-        <button class="btn btn-outline-danger" >Plusieurs Erreurs cliquez pour voir</button>
+        <button class="btn btn-danger" >Plusieurs Erreurs cliquez pour voir</button>
         </a>
         @endif
-        </div>
     </div>
     <div class="col-3 d-inline-flex justify-content-end">
         <div>
@@ -282,46 +279,60 @@
         <br>
         <br>
         @if(!empty($prospects_plusieurs_formation))
-        <h2>Prospect avec plusieurs Formations :</h2>
-        <br>
-            <table class="table">
-                <tr>
-                    <th scope="col">Code Apprenant</th>
-                    <th scope="col">Formation dans le tableau</th>
-                </tr>
-            @foreach($prospects_plusieurs_formation as $key => $formation)
-                <tr>
-                    <td>{{ $key }}</td>
-                    <td>{{ $formation["nomFormation"] }} - {{ $formation["nomAnnee"] }}</td>
-                </tr>
-            @endforeach
-            </table>
+        <div class="card border-dark">
+            <div class="card-header">
+                <h3>Prospect avec plusieurs Formations</h3>
+            </div>
+            <div class="card-body">
+                <table class="table">
+                    <tr>
+                        <th scope="col">Code Apprenant</th>
+                        <th scope="col">Formation dans le tableau</th>
+                    </tr>
+                    @foreach($prospects_plusieurs_formation as $key => $formation)
+                    <tr>
+                        <td>{{ $key }}</td>
+                        <td>{{ $formation["nomFormation"] }} - {{ $formation["nomAnnee"] }}</td>
+                    </tr>
+                    @endforeach
+                </table>         
+            </div>
+        </div>
         @endif
 
+        
+        <br>
+          
         <br>
         @if(!empty($erreur))
-
-        <h2 id="erreur">Erreur apprenant exclu du tableau :</h2>
-        <br>
-            <table class="table">
-                <tr>
-                    <th scope="col">Erreur</th>
-                    <th scope="col">Code Apprenant</th>
-                </tr>
-            @foreach($erreur as $key => $list)
-
-                <tr>
-                    <th scope="row">{{ $key }}</th>
-                    <td>
-                    @foreach($list as $key => $Apprenat)
-                        {{ $Apprenat }},
+        <div class="card border-danger">
+            <div class="card-header text-white bg-danger">
+                <h3 id="erreur">Erreur apprenant exclu du tableau</h3>
+            </div>
+            <div class="card-body">
+                <table class="table">
+                    <tr>
+                        <th scope="col">Erreur</th>
+                        <th scope="col">Code Apprenant</th>
+                    </tr>
+                    @foreach($erreur as $key => $list)
+                    <tr>
+                        <th scope="row">{{ $key }}</th>
+                        <td>
+                        @foreach($list as $key => $Apprenat)
+                            {{ $Apprenat }},
+                        @endforeach
+                        </td>
+                    </tr>
                     @endforeach
-                    </td>
-
-                </tr>
-            @endforeach
-            </table>
+                </table>
+            </div>
+        </div>
         @endif
+
+        
+        <br>
+            
 
     </div>
 </div>

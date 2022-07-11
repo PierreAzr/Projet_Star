@@ -9,6 +9,8 @@ use Illuminate\Support\Facades\Http;
 //mise en cache
 use Illuminate\Support\Facades\Cache;
 
+use Illuminate\Http\RedirectResponse;
+
 trait ApiRequestTrait {
 
     function ApiCallCurl($url) {
@@ -66,12 +68,22 @@ trait ApiRequestTrait {
 
         //Sur serveur
         //$response = Http::withHeaders([$header_token => $token_api])->get($url);
+   
+        if ($response->successful() ==  false) {
 
+            if ($response->serverError()) {
+                return redirect()->route('Welcome')->with('flash_message', "Une erreur c'est produit coté serveur sur une requete api; veuillez réessayer")
+                ->with('flash_type', 'alert-danger');
+            }elseif ($response->clientError()) {
+                return redirect()->route('welcome');
+            }
+            
+        }
         //var_dump($response->ok());
         // on decode le format json
         $data = json_decode($response, true);
-
         return $data;
+        
     }
 
 
@@ -79,8 +91,9 @@ trait ApiRequestTrait {
     protected function ApiPeriodes()
     {
         $api_data_periodes = Cache::get('api_data_periodes');
+        $api_data_periodes = null;
         if (empty($api_data_periodes)) {
-            $url = "https://citeformations.ymag.cloud/index.php/r/v1/periodes";
+            $url = "https://citeformations.ymag.cloud/index.php/r/v1/periodes12S";
             $api_data_periodes = $this->ApiCall($url);
             Cache::put('api_data_periodes', $api_data_periodes, env('TEMP_CACHE_TRAIT') );
         }

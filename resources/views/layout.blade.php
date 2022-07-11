@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
     <head>
-        <title>App Name - @yield('title')</title>
+        <title>Star - @yield('title')</title>
 
         
          <!-- DATATABLE -->
@@ -28,7 +28,10 @@
             
         <nav class="navbar navbar-expand-lg navbar-dark bg-dark">        
         <div class="container-fluid">
-            <a class="navbar-brand" href="{{ route('Welcome') }}">Star</a>
+            <a class="navbar-brand" href="{{ route('welcome') }}">
+                <img src="{{ asset('img/star_logo_navbar.png') }}" alt="" width="30" height="30" class="d-inline-block align-text-top">
+                STAR
+            </a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
             </button>
@@ -83,7 +86,7 @@
 
                 <li class="nav-item dropdown">
                 <a class="nav-link dropdown-toggle active" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                    Comptabilite
+                    Comptabilité
                 </a>
                 <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
                     <li><a class="dropdown-item" href="{{ route('comptabilite_welcome') }}">A venir</a></li>

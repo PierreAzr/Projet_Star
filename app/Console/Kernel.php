@@ -16,6 +16,13 @@ class Kernel extends ConsoleKernel
     protected function schedule(Schedule $schedule)
     {
         // $schedule->command('inspire')->hourly();
+        $schedule->call('App\Http\Controllers\AppController@CacheSchedule')->everyFifteenMinutes();
+        $schedule->call('App\Http\Controllers\Mediation\TableauEffectifsController@Effectifs')->everyFifteenMinutes();
+        
+        
+
+
+
     }
 
     /**

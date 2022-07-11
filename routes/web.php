@@ -3,8 +3,8 @@
 use Illuminate\Support\Facades\Route;
 
 use App\Http\Controllers\WelcomeController;
-use App\Http\Controllers\TableauEffectifsController;
-use App\Http\Controllers\MediationController;
+use App\Http\Controllers\Mediation\TableauEffectifsController;
+use App\Http\Controllers\Mediation\MediationController;
 use App\Http\Controllers\EducationController;
 use App\Http\Controllers\ExamensController;
 use App\Http\Controllers\ComptabiliteController;
@@ -35,7 +35,7 @@ Route::get('/test', [testRelationEntrepriseController::class, 'index'])->name('r
 
 }); */
 
-Route::get('/', [WelcomeController::class, 'index'])->name('Welcome');
+Route::get('/', [WelcomeController::class, 'index'])->name('welcome');
 
 //Mediation
 Route::get('/Mediation/Effectifs', [TableauEffectifsController::class, 'effectifs'])->name('mediation_tableau_effectifs');
