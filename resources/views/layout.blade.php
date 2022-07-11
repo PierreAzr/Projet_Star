@@ -34,27 +34,76 @@
             </button>
             <div class="collapse navbar-collapse" id="navbarSupportedContent">
             <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-                <li class="nav-item">
-                <a class="nav-link active" aria-current="page" href="{{ route('Welcome') }}">Home</a>
-                </li>
-                <li class="nav-item">
-                <a class="nav-link" href="#">Link</a>
-                </li>
+
                 <li class="nav-item dropdown">
                 <a class="nav-link dropdown-toggle active" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                    Mediation
+                    Médiation
                 </a>
                 <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
-                    <li><a class="dropdown-item" href="{{ route('relation_entreprise_index') }}">Tableau</a></li>
+                    <li><a class="dropdown-item" href="{{ route('mediation_tableau_effectifs') }}">Tableau</a></li>
                     <li><hr class="dropdown-divider"></li>
-                    <li><a class="dropdown-item" href="{{ route('rupture_contrat') }}">Rupture Contrat</a></li>
-                    
-                    <li><a class="dropdown-item" href="#">Something else here</a></li>
+                    <li><a class="dropdown-item" href="{{ route('mediation_rupture_contrat') }}">Rupture Contrat</a></li>
+                </ul>
+
+                <li class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle active" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                    Education
+                </a>
+                <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+                    <li><a class="dropdown-item" href="{{ route('eductaion_welcome') }}">A venir</a></li>
+                    <li><hr class="dropdown-divider"></li>
+                    <li><a class="dropdown-item" href="{{ route('eductaion_welcome') }}">A venir</a></li>
+                    <li><hr class="dropdown-divider"></li>
+                    <li><a class="dropdown-item" href="{{ route('eductaion_welcome') }}">A venir</a></li>
                 </ul>
                 </li>
-                <li class="nav-item">
-                <a class="nav-link disabled" href="#" tabindex="-1" aria-disabled="true">Disabled</a>
+
+                <li class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle active" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                    Examens
+                </a>
+                <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+                    <li><a class="dropdown-item" href="{{ route('examens_welcome') }}">A venir</a></li>
+                    <li><a class="dropdown-item" href="{{ route('examens_welcome') }}">A venir</a></li>
+                    <li><a class="dropdown-item" href="{{ route('examens_welcome') }}">A venir</a></li>
+                </ul>
                 </li>
+
+                <li class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle active" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                    Ressources Humaines
+                </a>
+                <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+                    <li><a class="dropdown-item" href="{{ route('ressources_humaines_welcome') }}">A venir</a></li>
+                    <li><hr class="dropdown-divider"></li>
+                    <li><a class="dropdown-item" href="{{ route('ressources_humaines_welcome') }}">A venir</a></li>
+                    <li><a class="dropdown-item" href="{{ route('ressources_humaines_welcome') }}">A venir</a></li>
+                </ul>
+                </li>
+
+                <li class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle active" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                    Comptabilite
+                </a>
+                <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+                    <li><a class="dropdown-item" href="{{ route('comptabilite_welcome') }}">A venir</a></li>
+                    <li><a class="dropdown-item" href="{{ route('comptabilite_welcome') }}">A venir</a></li>
+                    <li><hr class="dropdown-divider"></li>
+                    <li><a class="dropdown-item" href="{{ route('comptabilite_welcome') }}">A venir</a></li>
+                </ul>
+                </li>
+
+                <li class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle active" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                    Pédagogie
+                </a>
+                <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+                    <li><a class="dropdown-item" href="{{ route('pedagogie_welcome') }}">A venir</a></li>
+                    <li><hr class="dropdown-divider"></li>
+                    <li><a class="dropdown-item" href="{{ route('pedagogie_welcome') }}">A venir</a></li>
+                </ul>
+                </li>
+
             </ul>
             </div>
 

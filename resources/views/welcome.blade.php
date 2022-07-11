@@ -10,7 +10,7 @@
         <h2>Mediation</h2>
         <p>Ready to beyond the starter template? Check out these open source projects that you can quickly duplicate to a new GitHub repository.</p>
         <ul class="icon-list">
-          <li><a href="{{ route('relation_entreprise_index') }}" rel="noopener" >Tableau Effectifs</a></li>
+          <li><a href="{{ route('mediation_tableau_effectifs') }}" rel="noopener" >Tableau Effectifs</a></li>
         </ul>
       </div>
 

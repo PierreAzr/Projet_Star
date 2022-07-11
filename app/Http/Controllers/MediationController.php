@@ -8,6 +8,6 @@ class MediationController extends Controller
 {
     public function RuptureContrat()
     {
-        return view('metiationcontratrupture');
+        return view('mediation/rupturecontrat');
     }
 }

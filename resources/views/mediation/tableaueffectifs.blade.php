@@ -32,7 +32,7 @@
 
     <div class="col-3 d-flex justify-content-start">
         <!--Debut Formulaire enregistrement-->
-        <form method="get" action="{{ route('relation_entreprise_index') }}">
+        <form method="get" action="{{ route('mediation_tableau_effectifs') }}">
             <div class="input-group mb-3">
                 @php($date_min = date('Y-m-d'))
                 <input type="date" class="form-control"  min="{{ $date_min }}"  name="date" value="{{ $date }}">
@@ -74,7 +74,7 @@
 <div class="row">
         
 <!--Debut Formulaire enregistrement-->
-<form name="previs_save" id="previs_save" action="{{ route('previs_save_database') }}" method="POST">
+<form name="previs_save" id="previs_save" action="{{ route('mediation_previs_save_database') }}" method="POST">
     @csrf
     <input id="prodId" name="periode" type="hidden" value="{{ $periode_actuel }}">
     <input id="prodId2" name="date" type="hidden" value="{{ $date }}">
@@ -281,7 +281,7 @@
 
         <br>
         <br>
-        @if(isset($prospects_plusieurs_formation))
+        @if(!empty($prospects_plusieurs_formation))
         <h2>Prospect avec plusieurs Formations :</h2>
         <br>
             <table class="table">
@@ -299,7 +299,7 @@
         @endif
 
         <br>
-        @if(isset($erreur))
+        @if(!empty($erreur))
 
         <h2 id="erreur">Erreur apprenant exclu du tableau :</h2>
         <br>

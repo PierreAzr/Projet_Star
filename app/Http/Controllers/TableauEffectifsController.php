@@ -12,14 +12,14 @@ use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Session;
 
-class RelationEntrepriseController extends Controller
+class TableauEffectifsController extends Controller
 {
     
     use ApiRequestTrait;
 
     public $tab;
 
-    public function index(Request $request)
+    public function effectifs(Request $request)
     {   
 
         //date_default_timezone_set('Europe/Paris');
@@ -219,8 +219,10 @@ class RelationEntrepriseController extends Controller
         $a_memory = memory_get_usage(true);
         $memory = $a_memory - $d_memory;
         echo("temps execution : {$time}, Memoire utlisé : {$memory}"); 
-
-        return view('relationentreprise')
+        //dump($prospects_plusieurs_formation);
+        dd($erreur);
+        $erreur = null;
+        return view('mediation/relationentreprise')
                 ->with(compact('final_tab'))
                 ->with(compact('total_tab'))
                 ->with(compact('tableau_complet'))
@@ -366,10 +368,6 @@ class RelationEntrepriseController extends Controller
          
         // on fais Trois requetes a la fonction ProspectEvenement (fait la requete api est renvoi un tableau contenant les codeApprenant)
         // on recupere le code apprenant des prospects avec l'evenement voulu et on met en cache
-        // Date du jour et on prend un an avant(choix arbitraire) (imposible de rechercher prospect dans le futur la date correspond a la date de l'evenement)
-        //$date_debut_prospect = date_create()->modify('-1 year')->format('d-m-Y');
-        //$date_fin_prospect = date('d-m-Y');
-
         $prospects_tab_recu = Cache::get('prospects_tab_recu');
         if (empty($prospects_tab_recu)) {
 
@@ -391,6 +389,7 @@ class RelationEntrepriseController extends Controller
             Cache::put('prospects_tab_envoi', $prospects_tab_envoi, env('TEMP_CACHE_CONTROLLER'));
         }
         
+
         //Creation de la table prospects voulu
         $count = 0;
         $count2 = 0;
@@ -685,9 +684,10 @@ class RelationEntrepriseController extends Controller
                     array_push($liste_annee_null, $individu["CodeApprenant"]);
                     
                 }  else {
-                    if ($individu["nomFormation"] !='ERASMUS POST-APPRENTISSAGE') {
+                    if ($individu["nomFormation"] =='ERASMUS POST-APPRENTISSAGE') {
                         array_push($liste_annee_mauvaise, $individu["CodeApprenant"]);
                     }else{
+                        echo("erreur fonction annee de formation pas bon mais pas erasmus apprentisage");
                         dd($individu);
                     }
                     
