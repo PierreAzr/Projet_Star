@@ -24,13 +24,28 @@ class TableauEffectifsController extends Controller
     public function Effectifs(Request $request)
     {   
 
-        $api_data_periodes = $this->ApiPeriodes();
-        exit;
-        //date_default_timezone_set('Europe/Paris');
 
         //vider tous le cache
-        //Cache::flush();
+        Cache::flush();
 
+        /* $api_data_prospects = Cache::get('api_data_prospects');
+        $api_data_apprenants = Cache::get('api_data_apprenants');
+
+        $codeApprenant = 590931;
+        foreach ($api_data_apprenants as $apprenant) {          
+            if ($apprenant["codeApprenant"] == $codeApprenant) { 
+                echo("apprenant: $codeApprenant");   
+                dump($apprenant);   
+            }   
+        }
+        foreach ($api_data_prospects as $prospect) {
+
+            if ($prospect["codeApprenant"] ==  $codeApprenant ){  
+                echo('prospect');          
+                dump($prospect);
+            }
+        } */
+        //exit;
         ini_set('max_execution_time', 180);
         ini_set('memory_limit', '512M' );
         $d_microtime = microtime(true);
@@ -47,53 +62,56 @@ class TableauEffectifsController extends Controller
 
         if(empty($date)){
             echo("ttttt dateempty tttttt");
+            // si la date et vide on prend la date du jour
             $date_vide = true;
             $date = date("Y-m-d");
-            $date_du_jour = date_create();
+            $date_choisi = date_create();
             $date_annee_precedente = date_create()->modify('-1 year');
-            //$date_du_jour = date_create_from_format('d/m/Y', date("d/m/Y") );
-            //$date_annee_precedente = date_create_from_format('d/m/Y', date("d/m/Y") )->modify('-1 year');
 
         }else {
 
-            $date_du_jour = date_create_from_format('Y-m-d', $date ) ;
+            $date_choisi = date_create_from_format('Y-m-d', $date ) ;
             $date_annee_precedente = date_create_from_format('Y-m-d', $date )->modify('-1 year');
         }
 
-        //Requete api
+        //Requete api PERIODES
         $api_data_periodes = $this->ApiPeriodes();
-        //dd($api_data_periodes);
-
+        // on cherche la periode actuel et precedente
         foreach ($api_data_periodes as $periode) {
 
             $date_debut_periode = date_create_from_format('d/m/Y', $periode["dateDeb"] );
             $date_fin_periode = date_create_from_format('d/m/Y', $periode["dateFin"] );
 
-            if ($date_debut_periode <= $date_du_jour && $date_du_jour <= $date_fin_periode) {
+            // on determine la periode actuel 
+            if ($date_debut_periode <= $date_choisi && $date_choisi <= $date_fin_periode) {
                 $code_periode_actuel = $periode["codePeriode"];
                 $periode_actuel = $periode["nomPeriode"];
             }
 
-            //periode precedente
+            // on determine periode precedente
             if ($date_debut_periode <= $date_annee_precedente && $date_annee_precedente <= $date_fin_periode) {
                 $code_periode_precedente = $periode["codePeriode"];
             }
             
         }
 
-        
+        // si la periode n'existe pas on renvoi le tableau avec la date d'aujourdui
         if(!isset($code_periode_actuel)){
             return redirect()->route('relation_entreprise_index')->with('flash_message', "La date correspond a une periode qui n'existe pas encore")
             ->with('flash_type', 'alert-danger');
         }
 
-
+        //Si la date_choisi est la date du jour on recupere le cache
         $date_vide = null;
         if(!empty($date_vide)){
             echo("***********datevide***********");
             $tableau_complet = Cache::get('tableau_complet_date_vide');
             $final_tab = Cache::get('final_tab_date_vide');
             $total_tab = Cache::get('total_tab_date_vide');     
+            Cache::put('tableau_complet_date_vide', $tableau_complet, env('TEMP_CACHE_CONTROLLER'));
+            Cache::put('prospects_plusieurs_formation_date_vide', $prospects_plusieurs_formation, env('TEMP_CACHE_CONTROLLER'));
+            Cache::put('erreur_date_vide', $erreur, env('TEMP_CACHE_CONTROLLER'));
+            Cache::put('commun_tab_date_vide', $commun_tab, env('TEMP_CACHE_CONTROLLER'));
 
             if (!empty($tableau_complet) && !empty($final_tab) && !empty($total_tab)) {
          
@@ -102,9 +120,11 @@ class TableauEffectifsController extends Controller
                 ->with(compact('final_tab'))
                 ->with(compact('total_tab'))
                 ->with(compact('tableau_complet'))
-                ->with(compact('previs'))
                 ->with(compact('date'))
-                ->with(compact('periode_actuel'));
+                ->with(compact('periode_actuel'))
+                ->with(compact('prospects_plusieurs_formation'))
+                ->with(compact('erreur'))
+                ->with(compact('commun_tab'));
             }
 
         }
@@ -114,109 +134,136 @@ class TableauEffectifsController extends Controller
          $api_data_frequentes = Cache::get('api_data_frequentes');
         if (empty($api_data_frequentes)) {
             $api_data_frequentes = $this->ApiFrequentes($code_periode_actuel);
-            Cache::put('api_data_frequentes', $api_data_frequentes, 32000);
+            Cache::put('api_data_frequentes', $api_data_frequentes, env('TEMP_CACHE_CONTROLLER'));
         }   
 
-        $count = 0;
+
+        //creation de la table frequentation
         $frequente_tab=[];
         foreach ($api_data_frequentes as $frequente) {
 
+            // on verifie que la date
             $date_fin = date_create_from_format('d/m/Y', $frequente["dateFin"]);
             $date_deb = date_create_from_format('d/m/Y', $frequente["dateDeb"]);
-            if( (empty($frequente["dateFin"]) || $date_du_jour < $date_fin) && ($date_du_jour > $date_deb)) {
-                
+            if( (empty($frequente["dateFin"]) || $date_choisi < $date_fin) && ($date_choisi > $date_deb)) {
+                          
                 $frequente_tab[$frequente["codeApprenant"]] = array(
                     "codeApprenant" => $frequente["codeApprenant"],
                 );
-                $count++;
+
             }
         }
- 
-        $apprenants_tab = $this->ApprenantsTab($date_du_jour,$code_periode_actuel,$code_periode_precedente, $frequente_tab);
-
-       
-
-
-        #########################
-        ###########
-     /*    $date_debut_prospect = $date_annee_precedente->format('d-m-Y');
-        $date_fin_prospect = $date_du_jour->format('d-m-Y');
-        $this->prospectstest($code_periode_actuel, $date_debut_prospect, $date_fin_prospect, $frequente_tab= null,$apprenants_tab);
-        exit; */
-         #############################################################
+        
+        if(!empty($frequente_tab)){
+            
+            //on recupere la table des apprenants 
+            $apprenants_tab = $this->ApprenantsTab($date_choisi,$code_periode_actuel,$code_periode_precedente, $frequente_tab);
+        }else{
+            $apprenants_tab = null;
+        }
 
 
         //##Recupere la table des prospects voulu##
- 
-
         $prospects_tab_temp = $this->ProspectsTab($code_periode_actuel, $frequente_tab);
         if (isset($prospects_tab_temp)) {
             $prospects_tab = $prospects_tab_temp['prospects_tab'];
             $prospects_plusieurs_formation = $prospects_tab_temp['prospects_plusieurs_formation'];
+        }else {
+            $prospects_tab = null;
+            $prospects_plusieurs_formation = null;
         }
        
 
-        
+         foreach ($prospects_tab as $codeApprenant => $prospect) {
+            if(!empty($apprenants_tab[$codeApprenant])){
+
+                $commun_tab[$codeApprenant] = array(
+                    "nomApprenant" => $prospect["nomApprenant"],
+                    "prenomApprenant" => $prospect["prenomApprenant"],
+                    "nomFormation" => $apprenants_tab[$codeApprenant]["nomFormation"],
+                    "nomAnnee" => $apprenants_tab[$codeApprenant]["nomAnnee"],
+                    "nomFormationp" => $prospect["nomFormation"],
+                    "nomAnneep" => $prospect["nomAnnee"],
+                    "nomEtapeEvenement" => $prospect["nomEtapeEvenement"],
+                );
+
+            }
+        } 
 
         //############################################################################
         //############################################################################
         //$this->testfrequantation($prospects_tab);
         //$this->testCommun($apprenants_tab,$prospects_tab);
-        //$this->test($code_periode_actuel, $date_annee_precedente, $date_du_jour, $frequente_tab);
+        //$this->test($code_periode_actuel, $date_annee_precedente, $date_choisi, $frequente_tab);
         //$this->frequentUnique();
         //exit;
         //############################################################################
         //############################################################################  
+   
 
+        // Construction du tableau complet contenant les apprenants et les prospects
         if (isset($prospects_tab) && isset($apprenants_tab)) {
-            
-            $tableau_complet = array_merge($prospects_tab, $apprenants_tab);
+
+           // $tableau_complet = array_merge($prospects_tab, $apprenants_tab);
             //dump($tableau_complet);
 
-            //$tableau_complet = $apprenants_tab + $prospects_tab;
+            // ordre de l'addition est importante, le tableau apprenants ecrase le tableau prospects 
+            $tableau_complet =  $apprenants_tab + $prospects_tab;
+
+
+            //Prospect ecrase apprenant
+            //$tableau_complet =   $prospects_tab + $apprenants_tab;
             //dd($tableau_complet);
 
         }elseif (isset($apprenants_tab)) {
-            //dd('ok');
+
             $tableau_complet = $apprenants_tab;
-            Session::flash('message', 'Table prospects vide'); 
-            Session::flash('alert-class', 'alert-danger'); 
+
         }elseif (isset($prospects_tab)){
+
             $tableau_complet = $prospects_tab;
-            Session::flash('message', 'Table apprenants vide'); 
-            Session::flash('alert-class', 'alert-danger');  
+
         }else{
             return redirect()->route('relation_entreprise_index')->with('flash_message', "La date correspond a une periode qui existe mais il n'y a encore ni prospects ni apprenant")
             ->with('flash_type', 'alert-danger');  
         }
        
+
+        //Requete de la base de donnée
         $formations = \App\Models\Formations::join('previs', 'previs.idFormation', '=', 'formations.id')
         ->where('previs.periode', $periode_actuel)
         ->get(['formations.*', 'previs.*']); 
         
+        // On compte par formation le nombre 
+        //Construction du tableau final et du tableau total pour la vue
         $liste_tableau = $this->ConstructionTableauFinal($tableau_complet, $formations);
             $final_tab = $liste_tableau['final_tab'];
             $total_tab = $liste_tableau['total_tab'];
         
         //##erreur
         $erreur = $this->Erreur($tableau_complet, $formations);
+        //$erreur=null;
 
         // mise en cache tableau complet, final_tab et total_tab dans le cas ou la date est vide et donc on prend la date du jour
         if(isset($date_vide)){
             echo('sesesese  set date vide seseseeseees');
-            Cache::put('final_tab_date_vide', $final_tab, 32000);
-            Cache::put('total_tab_date_vide', $total_tab, 32000);
-            Cache::put('tableau_complet_date_vide', $tableau_complet, 32000);
+            Cache::put('final_tab_date_vide', $final_tab, env('TEMP_CACHE_CONTROLLER'));
+            Cache::put('total_tab_date_vide', $total_tab, env('TEMP_CACHE_CONTROLLER'));
+            Cache::put('tableau_complet_date_vide', $tableau_complet, env('TEMP_CACHE_CONTROLLER'));
+            Cache::put('prospects_plusieurs_formation_date_vide', $prospects_plusieurs_formation, env('TEMP_CACHE_CONTROLLER'));
+            Cache::put('erreur_date_vide', $erreur, env('TEMP_CACHE_CONTROLLER'));
+            Cache::put('commun_tab_date_vide', $commun_tab, env('TEMP_CACHE_CONTROLLER'));
+            
+
         }
 
         //$periode_actuel_cache = Cache::get('periode_cache');
-
         /* // mise en cache tableau complet, final_tab et total_tab avec la periode qui correspond
         if(isset($date_vide)){
-            Cache::put('periode_cache', $periode_actuel, 32000);
-            Cache::put('final_tab_cache', $final_tab, 32000);
-            Cache::put('total_tab_cache', $total_tab, 32000);
-            Cache::put('tableau_complet_cache', $tableau_complet, 32000);
+            Cache::put('periode_cache', $periode_actuel, env('TEMP_CACHE_CONTROLLER'));
+            Cache::put('final_tab_cache', $final_tab, env('TEMP_CACHE_CONTROLLER'));
+            Cache::put('total_tab_cache', $total_tab, env('TEMP_CACHE_CONTROLLER'));
+            Cache::put('tableau_complet_cache', $tableau_complet, env('TEMP_CACHE_CONTROLLER'));
         } */
 
         $a_microtime = microtime(true);
@@ -229,19 +276,14 @@ class TableauEffectifsController extends Controller
                 ->with(compact('final_tab'))
                 ->with(compact('total_tab'))
                 ->with(compact('tableau_complet'))
+                ->with(compact('date'))
+                ->with(compact('periode_actuel'))
                 ->with(compact('prospects_plusieurs_formation'))
                 ->with(compact('erreur'))
-                ->with(compact('date'))
-                ->with(compact('periode_actuel'));
+                ->with(compact('commun_tab'));
 
     }
 
-
-
-
-//############################################################################
-//############################################################################
-//############################################################################
 
     public function ConstructionTableauFinal($tableau_complet, $formations)
     {
@@ -363,7 +405,7 @@ class TableauEffectifsController extends Controller
         }
     }
 
-    protected function ProspectsTab($code_periode_actuel, $frequente_tab= null)
+    protected function ProspectsTab($code_periode_actuel)
     {
         // Premiere requete API on recupere la table des prospects correspondant a la periode scolaire
         // Aucune distinction possible entre les prospects cloturer ou non
@@ -394,84 +436,61 @@ class TableauEffectifsController extends Controller
         
         
         //Creation de la table prospects voulu
-        $count = 0;
-        $count2 = 0;
         $prospects_plusieurs_formation = [];
-        foreach ($api_data_prospects as $codeApprenant => $prospect) {
+        foreach ($api_data_prospects as  $prospect) {
 
-
-            $code_app = $prospect["codeApprenant"];
-            if (!empty($prospects_tab_envoi[$code_app]) || !empty($prospects_tab_recu[$code_app]) || !empty($prospects_tab_reception[$code_app]) ) {
+            //On verifie que le prospect est bien dans une des table prospect avec les evenements voulu
+            $codeApprenant = $prospect["codeApprenant"];
+            if (!empty($prospects_tab_envoi[$codeApprenant]) || !empty($prospects_tab_recu[$codeApprenant]) || !empty($prospects_tab_reception[$codeApprenant]) ) {
                
-                // un prospect ne peu pas etre en cours de formation
-                if (empty($frequente_tab[$code_app])) {
-                   
-                $count++;
+                //un prospect peu avoir plusieurs evenement racine, on prend le dernier qui correspond au dernier en date
+                $nombre_evenement_racine = count($prospect["evenementsRacines"]); 
+                $dernier_evenement_racine = $prospect["evenementsRacines"][$nombre_evenement_racine - 1]; 
 
-                    //un prospect peu avoir plusieurs evenement racine, on prend le dernier qui correspond au dernier en date
-                    $nombre_evenement_racine = count($prospect["evenementsRacines"]); 
-                    $dernier_evenement_racine = $prospect["evenementsRacines"][$nombre_evenement_racine - 1]; 
+                // si un evenement choisi c'est passe sur la periode mais n'est pas le dernier
+                // on verifie que le dernier evenement et un des bon codeEtape
+                //exemple cas prospects l'annee derniere non cloturé a un bon codeetape et de nouveau prospect
+                $codeEtape = $dernier_evenement_racine["dernierEvenement"]["codeEtapeEvenement"];
+                if ($codeEtape == 8 || $codeEtape == 149 || $codeEtape == 151 ) {
+            
+                    //Construction du tableau prsopects
+                    //Attention certain prospect on plusieur formation souhaite on prend la premiere 
+                    $prospects_tab[$prospect["codeApprenant"]] = array(
+                        "CodeApprenant" =>$prospect["codeApprenant"],
+                        "nomApprenant" => $prospect["nomApprenant"],
+                        "prenomApprenant" => $prospect["prenomApprenant"],
+                        "nomFormation" => $dernier_evenement_racine["formationsSouhaitees"][0]["nomFormation"],
+                        "nomAnnee" => $dernier_evenement_racine["formationsSouhaitees"][0]["nomAnnee"],
+                        "nomStatut" => $dernier_evenement_racine["formationsSouhaitees"][0]["nomStatut"],
+                        "codeEtapeEvenement" => $dernier_evenement_racine["dernierEvenement"]["codeEtapeEvenement"],
+                        "nomEtapeEvenement" => $dernier_evenement_racine["dernierEvenement"]["nomEtapeEvenement"],
 
-                    // si un evenement choisi c'est passe sur la periode mais n'est pas le dernier
-                    // on verifie que le dernier evenement et un des bon codeEtape
-                    $codeEtape = $dernier_evenement_racine["dernierEvenement"]["codeEtapeEvenement"];
-                    if ($codeEtape == 8 || $codeEtape == 149 || $codeEtape == 151 ) {
-                
-                        //Construction du tableau prsopects
-                        //Attention certain prospect on plusieur formation souhaite on prend la premiere 
-                        $prospects_tab[$prospect["codeApprenant"]] = array(
-                            "CodeApprenant" =>$prospect["codeApprenant"],
+                    );
+
+                    //construction tableau prsopect plusieur formation
+                    $nombre_formation = count($dernier_evenement_racine["formationsSouhaitees"]);
+                    if ( $nombre_formation > 1) {
+                        
+                        $prospects_plusieurs_formation[$prospect["codeApprenant"]] = array(
                             "nomApprenant" => $prospect["nomApprenant"],
                             "prenomApprenant" => $prospect["prenomApprenant"],
-                            "nomFormation" => $dernier_evenement_racine["formationsSouhaitees"][0]["nomFormation"],
-                            "nomAnnee" => $dernier_evenement_racine["formationsSouhaitees"][0]["nomAnnee"],
-                            "nomStatut" => $dernier_evenement_racine["formationsSouhaitees"][0]["nomStatut"],
-                            "codeEtapeEvenement" => $dernier_evenement_racine["dernierEvenement"]["codeEtapeEvenement"],
-                            "nomEtapeEvenement" => $dernier_evenement_racine["dernierEvenement"]["nomEtapeEvenement"],
+                            );  
 
-                        );
+                        for ($i=0; $i < $nombre_formation ; $i++) {
 
-                        $nombre_formation = count($dernier_evenement_racine["formationsSouhaitees"]);
-                        
-                        if ( $nombre_formation > 1) {
-                            $prospects_plusieurs_formation[$prospect["codeApprenant"]] = array(
-                                "nomFormation" => $dernier_evenement_racine["formationsSouhaitees"][0]["nomFormation"],
-                                "nomAnnee" => $dernier_evenement_racine["formationsSouhaitees"][0]["nomAnnee"]
+                            $prospects_plusieurs_formation[$prospect["codeApprenant"]] += array(
+                                "nomFormation$i" => $dernier_evenement_racine["formationsSouhaitees"][$i]["nomFormation"],
+                                "nomAnnee$i" => $dernier_evenement_racine["formationsSouhaitees"][$i]["nomAnnee"],
                             );
-                                                    
-                            /*                           
-                            for ($i=0; $i < $nombre_formation ; $i++) {
+                        }  
+                        
+                    }        
 
-                                $prospects_plusieurs_formation[$prospect["codeApprenant"]] = array(
-                                    "nomFormation$i" => $dernier_evenement_racine["formationsSouhaitees"][$i]["nomFormation"],
-                                    "nomAnnee$i" => $dernier_evenement_racine["formationsSouhaitees"][$i]["nomAnnee"],
-
-                                );
-                            }  */
-                            
-                        }        
-
-                    }else{
-                        //653791
-                        //etape information complementaire
-                        //dump($prospect);
-                    }
-                    
                 }
             }
     
         }
-/*         $prospects_tab_recu = $this->ProspectEvenement($codeEvenement=8);
-        dump($prospects_tab_envoi);
-        dump($prospects_tab_reception);
-        dump( $prospects_tab_recu );
-        exit; */
-        //dd($prospects_tab);
-        /* dump($count);
-        dump($count2);
-        $prospect_evenement = array_merge($prospects_tab_envoi , $prospects_tab_reception, $prospects_tab_recu );
-        dump($prospect_evenement);
-        exit;  */
+
         //$prospects_plusieurs_formation = null;
         //$prospect_evenement = array_merge($prospects_tab_envoi , $prospects_tab_reception, $prospects_tab_recu );
         //$prospects_tab = null;
@@ -483,26 +502,26 @@ class TableauEffectifsController extends Controller
         
     }
 
-    public function ApprenantsTab($date_du_jour,$code_periode_actuel,$code_periode_precedente, $frequente_tab = null)
+    public function ApprenantsTab($date_choisi,$code_periode_actuel,$code_periode_precedente, $frequente_tab)
     {
 
          //requete avec cache pour test affichage
         $api_data_apprenants = Cache::get('api_data_apprenants');
         if (empty($api_data_apprenants)) {
             $api_data_apprenants = $this->ApiApprenants($code_periode_actuel);
-            Cache::put('api_data_apprenants', $api_data_apprenants, 32000);
+            Cache::put('api_data_apprenants', $api_data_apprenants, env('TEMP_CACHE_CONTROLLER'));
         }
         
         $api_data_apprenants_precedent = Cache::get('api_data_apprenants_precedent');
         if (empty($api_data_apprenants_precedent)) {
             $api_data_apprenants_precedent = $this->ApiApprenants($code_periode_precedente);
-            Cache::put('api_data_apprenants_precedent', $api_data_apprenants_precedent, 32000);
+            Cache::put('api_data_apprenants_precedent', $api_data_apprenants_precedent, env('TEMP_CACHE_CONTROLLER'));
         }
                                 
         $api_data_frequentes_precedent = Cache::get('api_data_frequentes_precedent');
         if (empty($api_data_frequentes_precedent)) {
             $api_data_frequentes_precedent = $this->ApiFrequentes($code_periode_precedente);
-            Cache::put('api_data_frequentes_precedent', $api_data_frequentes_precedent, 32000);
+            Cache::put('api_data_frequentes_precedent', $api_data_frequentes_precedent, env('TEMP_CACHE_CONTROLLER'));
         }    
         
         /*         $api_data_apprenants = $this->ApiApprenants($code_periode_actuel);
@@ -545,13 +564,13 @@ class TableauEffectifsController extends Controller
         foreach ($api_data_contrats as $contrat) {
 
             $date_fin = date_create_from_format('d/m/Y', $contrat["dateFinContrat"] ) ;
-            //$date_du_jour = date_create_from_format('d/m/Y', date("d/m/Y") );
+            //$date_choisi = date_create_from_format('d/m/Y', date("d/m/Y") );
 
             // on garde les contrats qui non pas de date de resiliation et qui sont relier a une entreprise
             // les contrats qui nom pas d'entreprise corresponde a un contrat intermedaire suite a une rupture en attandant que l'apprenant trouve une nouvel entreprise
             if (empty($contrat["dateResiliation"]) && !empty($contrat["codeEntreprise"])) {
       
-                if ($date_fin > $date_du_jour) {
+                if ($date_fin > $date_choisi) {
 
                     $contrats_tab[$contrat["codeApprenant"]] = array(
                         "codeEntreprise" =>$contrat["codeEntreprise"],
@@ -576,7 +595,7 @@ class TableauEffectifsController extends Controller
                 $entreprises_tab[$entreprise["codeEntreprise"]] = $entreprise["nomEntreprise"];
             }
 
-            Cache::put('entreprises_tab', $entreprises_tab, 32000);
+            Cache::put('entreprises_tab', $entreprises_tab, env('TEMP_CACHE_CONTROLLER'));
         }
 
  
@@ -651,23 +670,19 @@ class TableauEffectifsController extends Controller
         //exit;
         //$previ = new \App\Models\Previ;
         foreach ($request->input() as $key => $value) {
-            if (is_numeric($key)) {      
+            if (is_int($key)) {      
                 if(is_numeric($value)) {      
                     $previ = \App\Models\Previ::updateOrCreate(
                         ['idFormation' => $key, 'periode' => $periode],
                         ['previ' => $value ]
                     );
                 }else {
-                    return redirect()->route('mediation_tableau_effectifs', ['date' => $date])->with('flash_message', 'Erreur les champs doivent etre des nombres')
+                    return redirect()->route('mediation_tableau_effectifs', ['date' => $date])->with('flash_message', 'Erreur les champs doivent être des nombres')
                     ->with('flash_type', 'alert-danger');
                 }
             }
         }
-                //return redirect(route('relation_entreprise_index')."?date=$date")->with('flash_message', 'Erreur les champs doivent etre des nombres')
-        //->with('flash_type', 'alert-danger');
 
-        /* Session::flash('flash_message', '<b>Well done!</b> You successfully logged in to this website.');
-        Session::flash('flash_type', 'alert-success'); */
        return redirect()->route('mediation_tableau_effectifs', ['date' => $date])->with('flash_message', 'Previsionel enregitrer')
                                                     ->with('flash_type', 'alert-success');
 
@@ -678,28 +693,42 @@ class TableauEffectifsController extends Controller
         
         $liste_annee_null = [];
         $liste_annee_mauvaise = [];
+        $liste_formation_existe_pas = [];
+        $liste_fomation_erasmus = [];
         foreach ($tableau_complet as $individu) {
 
-            $pas_bonne_annee = True;
+            $mauvaise_annee = True;
+            $formation_existe_pas = True;
             foreach ($formations as $formation) {
-                if($individu['nomFormation'] == $formation["nomFormation"]  && $individu["nomAnnee"] == $formation["nomAnnee"]){
-                    $pas_bonne_annee = False;
+
+                if($individu['nomFormation'] == $formation["nomFormation"] ){
+                    // la formation existe bien dans la basse de donnée
+                    $formation_existe_pas = False;
+           
+                    if($individu["nomAnnee"] == $formation["nomAnnee"]){
+                        // l'annee et la formation existe bien
+                        $mauvaise_annee = False;
+                    }
+                }
+
+            }
+
+            // liste des prospects/apprenants avec un mauvais nom d'année
+            if ($mauvaise_annee) {
+                if(empty($individu["nomAnnee"])){
+                    array_push($liste_annee_null, $individu["CodeApprenant"]);                   
+                }else{
+                    array_push($liste_annee_mauvaise, $individu["CodeApprenant"]);            
                 }
             }
 
-            if ($pas_bonne_annee) {
-                if(empty($individu["nomAnnee"])){
-                    array_push($liste_annee_null, $individu["CodeApprenant"]);
-                    
-                }  else {
-                    if ($individu["nomFormation"] !='ERASMUS POST-APPRENTISSAGE') {
-                        array_push($liste_annee_mauvaise, $individu["CodeApprenant"]);
-                    }else{
-                        echo("erreur fonction annee de formation pas bon mais pas erasmus apprentisage");
-                        //dd($individu);
-                    }
-                    
-                }
+            //liste des prospects/apprenants avec une formation qui n'est pas dans la basse
+            if ($formation_existe_pas) {            
+                if ($individu["nomFormation"] !='ERASMUS POST-APPRENTISSAGE') {
+                    array_push($liste_fomation_erasmus, $individu["CodeApprenant"]);
+                }else{
+                    array_push($liste_formation_existe_pas, $individu["CodeApprenant"]);
+                }            
             }
 
 
@@ -712,7 +741,9 @@ class TableauEffectifsController extends Controller
         
         if (!empty($liste_annee_mauvaise) && !empty($liste_annee_null)) {
             return array('liste_annee_mauvaise' => $liste_annee_mauvaise,
-            'liste_annee_null' => $liste_annee_null
+            'liste_annee_null' => $liste_annee_null,
+            'liste_formation_existe_pas' => $liste_formation_existe_pas,
+            'liste_fomation_erasmus' => $liste_fomation_erasmus,
             );
         }else {
             return  null;
@@ -723,9 +754,7 @@ class TableauEffectifsController extends Controller
     }
 
 
-
-
-    public function test($code_periode_actuel, $date_annee_precedente, $date_du_jour, $frequente_tab)
+    public function test($code_periode_actuel, $date_annee_precedente, $date_choisi, $frequente_tab)
     {
         //####################################################
         //#################################################################
@@ -784,19 +813,19 @@ class TableauEffectifsController extends Controller
                   'nomEntreprise' => 'GREENSUB',
                 )
                 );
-                /* 
+                 
                 dump($tab1);
                 dump($tab2);
         $tab = array_merge($tab1, $tab2);
         $tab = $tab2 +$tab1;
-        dd($tab); */
+        dd($tab); 
 
 
        
 
 
         $date_debut_prospect = $date_annee_precedente->format('d-m-Y');
-        $date_fin_prospect = $date_du_jour->format('d-m-Y');
+        $date_fin_prospect = $date_choisi->format('d-m-Y');
         $prospects_tab = $this->ProspectsTab($code_periode_actuel, $date_debut_prospect, $date_fin_prospect, $frequente_tab);
 
         //dd($prospects_tab);
@@ -807,10 +836,10 @@ class TableauEffectifsController extends Controller
         foreach ($api_data_contrats as $contrat) {
 
             $date_fin = date_create_from_format('d/m/Y', $contrat["dateFinContrat"] ) ;
-            //$date_du_jour = date_create_from_format('d/m/Y', date("d/m/Y") );
+            //$date_choisi = date_create_from_format('d/m/Y', date("d/m/Y") );
 
             if (empty($contrat["dateResiliation"]) && !empty($contrat["codeEntreprise"])) {
-                if ($date_fin > $date_du_jour) {
+                if ($date_fin > $date_choisi) {
 
                 $contrats_tab[$contrat["codeApprenant"]] = array(
                     "codeEntreprise" =>$contrat["codeEntreprise"],
@@ -821,7 +850,7 @@ class TableauEffectifsController extends Controller
                 }
             }else {
                 $date_fin = date_create_from_format('d/m/Y', $contrat["dateResiliation"] );
-                if ($date_fin > $date_du_jour) {
+                if ($date_fin > $date_choisi) {
 
                     $erreur++;
                     //dump($contrat);
@@ -1293,7 +1322,7 @@ class TableauEffectifsController extends Controller
         if (empty($api_data_prospects)) {
 
             $api_data_prospects = $this->ApiProspects(11);
-            Cache::put('api_data_prospects', $api_data_prospects, 32000);
+            Cache::put('api_data_prospects', $api_data_prospects, env('TEMP_CACHE_CONTROLLER'));
         }
         dump($api_data_prospects);
 
@@ -1301,7 +1330,7 @@ class TableauEffectifsController extends Controller
         if (empty($api_data_prospects_futur)) {
 
             $api_data_prospects_futur = $this->ApiProspects(15);
-            Cache::put('api_data_prospects_futur', $api_data_prospects_futur, 32000);
+            Cache::put('api_data_prospects_futur', $api_data_prospects_futur, env('TEMP_CACHE_CONTROLLER'));
         }
         dump($api_data_prospects_futur);
 
@@ -1310,21 +1339,21 @@ class TableauEffectifsController extends Controller
         if (empty($prospects_tab_recu)) {
 
             $prospects_tab_recu = $this->ProspectEvenement($codeEvenement=8, $date_debut_prospect, $date_fin_prospect );
-            Cache::put('prospects_tab_recu', $prospects_tab_recu, 32000);
+            Cache::put('prospects_tab_recu', $prospects_tab_recu, env('TEMP_CACHE_CONTROLLER'));
         }
 
         $prospects_tab_reception = Cache::get('prospects_tab_reception');
         if (empty($prospects_tab_reception)) {
 
             $prospects_tab_reception = $this->ProspectEvenement($codeEvenement=151, $date_debut_prospect, $date_fin_prospect );
-            Cache::put('prospects_tab_reception', $prospects_tab_reception, 32000);
+            Cache::put('prospects_tab_reception', $prospects_tab_reception, env('TEMP_CACHE_CONTROLLER'));
         }
 
         $prospects_tab_envoi = Cache::get('prospects_tab_envoi');
         if (empty($prospects_tab_envoi)) {
 
             $prospects_tab_envoi = $this->ProspectEvenement($codeEvenement=149, $date_debut_prospect, $date_fin_prospect );
-            Cache::put('prospects_tab_envoi', $prospects_tab_envoi, 32000);
+            Cache::put('prospects_tab_envoi', $prospects_tab_envoi, env('TEMP_CACHE_CONTROLLER'));
         }
 
 
@@ -1332,21 +1361,21 @@ class TableauEffectifsController extends Controller
         $prospects_tab_recu_test = Cache::get('prospects_tab_recu_test');
         if (empty($prospects_tab_recu_test)) {
             $prospects_tab_recu_test = $this->ApiProspectsEvenement($codeTypeEvt=4, $codeEvenement=8, $date_debut_prospect, $date_fin_prospect, $evtClotures=0);
-            Cache::put('prospects_tab_recu_test', $prospects_tab_recu_test, 32000);
+            Cache::put('prospects_tab_recu_test', $prospects_tab_recu_test, env('TEMP_CACHE_CONTROLLER'));
         }
 
         $prospects_tab_reception_test = Cache::get('prospects_tab_reception_test');
         if (empty($prospects_tab_reception_test)) {
 
             $prospects_tab_reception_test = $this->ApiProspectsEvenement($codeTypeEvt=4, $codeEvenement=151, $date_debut_prospect, $date_fin_prospect, $evtClotures=0);
-            Cache::put('prospects_tab_reception_test', $prospects_tab_reception_test, 32000);
+            Cache::put('prospects_tab_reception_test', $prospects_tab_reception_test, env('TEMP_CACHE_CONTROLLER'));
         }
 
         $prospects_tab_envoi_test = Cache::get('prospects_tab_envoi_test');
         if (empty($prospects_tab_envoi_test)) {
 
             $prospects_tab_envoi_test = $this->ApiProspectsEvenement($codeTypeEvt=4, $codeEvenement=149, $date_debut_prospect, $date_fin_prospect, $evtClotures=0);
-            Cache::put('prospects_tab_envoi_test', $prospects_tab_envoi_test, 32000);
+            Cache::put('prospects_tab_envoi_test', $prospects_tab_envoi_test, env('TEMP_CACHE_CONTROLLER'));
         }
 
 

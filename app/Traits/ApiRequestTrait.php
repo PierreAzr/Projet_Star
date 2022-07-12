@@ -68,14 +68,19 @@ trait ApiRequestTrait {
 
         //Sur serveur
         //$response = Http::withHeaders([$header_token => $token_api])->get($url);
-   
+        
+        //on test si la reponse et mauvaise
         if ($response->successful() ==  false) {
 
             if ($response->serverError()) {
-                return redirect()->route('Welcome')->with('flash_message', "Une erreur c'est produit coté serveur sur une requete api; veuillez réessayer")
+                return redirect()->route('Welcome')->with('flash_message', "Une erreur s'est produite côté serveur sur une requête api; veuillez réessayer")
                 ->with('flash_type', 'alert-danger');
             }elseif ($response->clientError()) {
-                return redirect()->route('welcome');
+                
+                return redirect()->route('welcome')->with('flash_message', "Une erreur s'est produite de notre côté sur une requête api")
+                ->with('flash_type', 'alert-danger')->send();
+            }else{
+                $response->throw();
             }
             
         }
@@ -93,9 +98,9 @@ trait ApiRequestTrait {
         $api_data_periodes = Cache::get('api_data_periodes');
         $api_data_periodes = null;
         if (empty($api_data_periodes)) {
-            $url = "https://citeformations.ymag.cloud/index.php/r/v1/periodes12S";
+            $url = "https://citeformations.ymag.cloud/index.php/r/v1/periodes";
             $api_data_periodes = $this->ApiCall($url);
-            Cache::put('api_data_periodes', $api_data_periodes, env('TEMP_CACHE_TRAIT') );
+            Cache::put('api_data_periodes', $api_data_periodes, env('TEMP_CACHE_TRAITS') );
         }
 
         return  $api_data_periodes;
@@ -109,7 +114,7 @@ trait ApiRequestTrait {
         if (empty($api_data_formations)) {
             $url = "https://citeformations.ymag.cloud/index.php/r/v1/formations";
             $api_data_formations = $this->ApiCall($url);
-            Cache::put('api_data_formations', $api_data_formations, env('TEMP_CACHE_TRAIT'));
+            Cache::put('api_data_formations', $api_data_formations, env('TEMP_CACHE_TRAITS'));
         }
 
         return  $api_data_formations;
@@ -130,7 +135,6 @@ trait ApiRequestTrait {
 
         return $api_data_apprenants;
     }
-
 
     // ****FREQUENTES
     protected function ApiFrequentes($code_periode=null)
@@ -159,7 +163,7 @@ trait ApiRequestTrait {
         return $api_data_prospects;
     }
 
-    //Prospects (possibilite de d'avoir seulement les prsopect en cours)
+    //Prospects (possibilite d'avoir seulement les prospects en cours)
     protected function ApiProspectsEvenement($codeTypeEvt, $codeEvenement, $dateDebut, $dateFin, $evtClotures )
     {
 
@@ -195,15 +199,14 @@ trait ApiRequestTrait {
         if (empty($api_data_entreprises)) {
             $url = "https://citeformations.ymag.cloud/index.php/r/v1/entreprises";
             $api_data_entreprises = $this->ApiCall($url);
-            Cache::put('api_data_entreprises', $api_data_entreprises, env('TEMP_CACHE_TRAIT'));
+            Cache::put('api_data_entreprises', $api_data_entreprises, env('TEMP_CACHE_TRAITS'));
         }
         return $api_data_entreprises;
     }
 
     // ****GROUPES
     protected function ApiGroupes($code_periode=null)
-    {
-        
+    {    
         $api_data_groupes = Cache::get('api_data_groupes');
         $api_data_groupes = null;
         if (empty($api_data_groupes)) {

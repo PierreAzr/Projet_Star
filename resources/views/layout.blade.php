@@ -15,8 +15,10 @@
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-ka7Sk0Gln4gmtz2MlQnikT1wXgYsOg+OMhuP+IlRH9sENBO0LRn5q+8nbTov4+1p" crossorigin="anonymous"></script>
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.3/font/bootstrap-icons.css">
 <style>
-
-
+/* .dropdown:hover .dropdown-menu{
+  display:block;
+  margin-top: 0;
+} */
 </style>
 
     </head>
@@ -148,9 +150,11 @@
         </div>
     </body>
     <script>
+        //script pour enlever le message erreur ou de succes au bout de 10s
         $("document").ready(function(){
                     setTimeout(function(){ $("div.alert").remove(); }, 10000 ); // 10 secs
 
          });
+
     </script>
 </html>
