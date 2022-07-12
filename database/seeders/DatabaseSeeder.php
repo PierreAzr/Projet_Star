@@ -28,12 +28,12 @@ class DatabaseSeeder extends Seeder
 
         DB::table('users')->insert([
           'name' => 'user',
-          'email' => 'user1@email.com',
+          'email' => 'user@email.com',
           'password' => bcrypt('password'),
         ]);
         DB::table('users')->insert([
             'name' => 'admin',
-            'email' => 'admin@email.com',
+            'email' => '2admin@email.com',
             'password' => bcrypt('admin'),
         ]);
         

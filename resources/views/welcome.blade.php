@@ -1,6 +1,6 @@
 @extends('layout')
 
-@section('title', 'Relation Entreprise Tableau')
+@section('title', 'Acceuil')
 
 @section('content')
 

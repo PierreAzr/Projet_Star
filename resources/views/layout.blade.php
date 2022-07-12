@@ -14,26 +14,24 @@
         <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous">
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-ka7Sk0Gln4gmtz2MlQnikT1wXgYsOg+OMhuP+IlRH9sENBO0LRn5q+8nbTov4+1p" crossorigin="anonymous"></script>
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.3/font/bootstrap-icons.css">
-<style>
-/* .dropdown:hover .dropdown-menu{
-  display:block;
-  margin-top: 0;
-} */
-</style>
+
 
     </head>
     <body>
 
         @section('sidebar')
     <header >
-
-            
+    @if (Route::has('login'))
+  
         <nav class="navbar navbar-expand-lg navbar-dark bg-dark">        
         <div class="container-fluid">
+
             <a class="navbar-brand" href="{{ route('welcome') }}">
                 <img src="{{ asset('img/star_logo_navbar.png') }}" alt="" width="30" height="30" class="d-inline-block align-text-top">
                 STAR
             </a>
+           
+            @auth
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
             </button>
@@ -110,25 +108,34 @@
                 </li>
 
             </ul>
-            </div>
 
-            @if (Route::has('login'))
-                <div class="hidden fixed top-0 right-0 px-6 py-4 sm:block">
-                    @auth
-                        <a href="{{ url('/home') }}" class="text-sm text-gray-700 dark:text-gray-500 underline">Home</a>
-                    @else
-                        <a href="{{ route('login') }}" class="text-sm text-gray-700 dark:text-gray-500 underline">Log in</a>
 
-                        @if (Route::has('register'))
-                            <a href="{{ route('register') }}" class="ml-4 text-sm text-gray-700 dark:text-gray-500 underline">Register</a>
-                        @endif
-                    @endauth
+
+                    <div class="dropdown  dropstart me-5 pe-5">
+                    <a href="#" class="d-block link-dark text-decoration-none text-white dropdown-toggle" id="dropdownUser1" data-bs-toggle="dropdown" aria-expanded="false">
+                    {{ Auth::user()->name }}
+                    </a>
+                    <ul class="dropdown-menu text-small" aria-labelledby="dropdownUser1">
+                    <li>
+                        <li><span class="dropdown-item-text">{{ Auth::user()->email }}</span></li>      
+                        </li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li>
+                        <a class="dropdown-item" href="{{ route('logout') }}" onclick="event.preventDefault(); document.getElementById('logout-form').submit();">Déconnexion</a>
+                                <form id="logout-form" action="{{ route('logout') }}" method="POST" style="">
+                                    @csrf
+                                </form>
+                        </li>
+                    </ul>
                 </div>
-            @endif
+            
+            </div>
+                @else
 
+                @endauth
+            @endif
         </div>
         </nav>
-
     </header>
 
         @show  
