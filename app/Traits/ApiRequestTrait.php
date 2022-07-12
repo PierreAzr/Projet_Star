@@ -154,7 +154,7 @@ trait ApiRequestTrait {
     protected function ApiProspects($code_periode=null)
     {
         $api_data_prospects = Cache::get('api_data_prospects');
-        //$api_data_prospects = null;
+        $api_data_prospects = null;
         if (empty($api_data_prospects)) {
             $url = "https://citeformations.ymag.cloud/index.php/r/v1/formation-longue/prospects-with-events?codesPeriode=".$code_periode;
             $api_data_prospects = $this->ApiCall($url);
