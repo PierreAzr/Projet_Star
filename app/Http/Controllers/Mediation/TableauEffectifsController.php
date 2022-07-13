@@ -925,8 +925,6 @@ class TableauEffectifsController extends Controller
                 }       
             }
 
-
-
         }
         
         if (!empty($liste_annee_mauvaise) && !empty($liste_annee_null)) {
