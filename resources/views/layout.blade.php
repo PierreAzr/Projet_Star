@@ -106,10 +106,7 @@
                     <li><a class="dropdown-item" href="{{ route('pedagogie_welcome') }}">A venir</a></li>
                 </ul>
                 </li>
-
             </ul>
-
-
 
                     <div class="dropdown  dropstart me-5 pe-5">
                     <a href="#" class="d-block link-dark text-decoration-none text-white dropdown-toggle" id="dropdownUser1" data-bs-toggle="dropdown" aria-expanded="false">

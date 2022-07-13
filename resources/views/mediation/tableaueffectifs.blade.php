@@ -79,9 +79,6 @@
                         @if( $key  == "liste_formation_existe_pas")
                         <div>Le nom de la formation n'est pas dans le tableau* </div>
                         @endif
-                        @if( $key  == "liste_fomation_erasmus")
-                        <p>Formation Erasmus</p>    
-                        @endif
                     </th>
                     <td>
                     @foreach($list as $key => $Apprenat)
@@ -441,12 +438,7 @@
     </div>
 </div>
    
-
-
-    <br>
-                
-
-
+<br>
 
 <script>
     $(document).ready( function () {
@@ -462,44 +454,9 @@
                 
             });
 
-
-        //pour resoudre le probleme d'enregistrement du formulaire
-        $('#previs_save').on('submit', function(e){
-        var form = this;
-
-        // Encode a set of form elements from all pages as an array of names and values
-        var params = table.$('input,select,textarea').serializeArray();
-
-        // Iterate over all form elements
-        $.each(params, function(){     
-            // If element doesn't exist in DOM
-            if(!$.contains(document, form[this.name])){
-                // Create a hidden element 
-                $(form).append(
-                $('<input>')
-                    .attr('type', 'hidden')
-                    .attr('id', this.id)
-                    .attr('name', this.name)
-                    .val(this.value)
-                );
-            } 
-        });      
-
-
-        console.log(form);
-        // Prevent actual form submission
-        //e.preventDefault();
     });      
 
     
-
-       /*  $('#button_sub').click( function () {
-            let data = table.rows().data()
-            console.log(data)
-        } ); */
-
-
-    });
 </script>
 
 @stop

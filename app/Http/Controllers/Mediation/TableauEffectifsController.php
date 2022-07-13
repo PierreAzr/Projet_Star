@@ -108,10 +108,10 @@ class TableauEffectifsController extends Controller
             $tableau_complet = Cache::get('tableau_complet_date_vide');
             $final_tab = Cache::get('final_tab_date_vide');
             $total_tab = Cache::get('total_tab_date_vide');     
-            Cache::put('tableau_complet_date_vide', $tableau_complet, env('TEMP_CACHE_CONTROLLER'));
-            Cache::put('prospects_plusieurs_formation_date_vide', $prospects_plusieurs_formation, env('TEMP_CACHE_CONTROLLER'));
-            Cache::put('erreur_date_vide', $erreur, env('TEMP_CACHE_CONTROLLER'));
-            Cache::put('commun_tab_date_vide', $commun_tab, env('TEMP_CACHE_CONTROLLER'));
+            $tableau_complet = Cache::put('tableau_complet_date_vide');
+            $prospects_plusieurs_formation = Cache::put('prospects_plusieurs_formation_date_vide');
+            $erreur = Cache::put('erreur_date_vide');
+            $commun_tab = Cache::put('commun_tab_date_vide');
 
             if (!empty($tableau_complet) && !empty($final_tab) && !empty($total_tab)) {
          
@@ -162,9 +162,11 @@ class TableauEffectifsController extends Controller
             $apprenants_tab = null;
         }
 
-
         //##Recupere la table des prospects voulu##
-        $prospects_tab_temp = $this->ProspectsTab2($code_periode_actuel, $frequente_tab);
+        $prospects_tab_temp = $this->ProspectsTab();
+        //$prospects_tab_temp = $this->ProspectsTabPeriode($code_periode_actuel);
+        //$prospects_tab_temp = $this->ProspectsTabEventPeriode($code_periode_actuel);
+
         if (isset($prospects_tab_temp)) {
             $prospects_tab = $prospects_tab_temp['prospects_tab'];
             $prospects_plusieurs_formation = $prospects_tab_temp['prospects_plusieurs_formation'];
@@ -189,17 +191,6 @@ class TableauEffectifsController extends Controller
 
             }
         } 
-
-        //############################################################################
-        //############################################################################
-        //$this->testfrequantation($prospects_tab);
-        //$this->testCommun($apprenants_tab,$prospects_tab);
-        //$this->test($code_periode_actuel, $date_annee_precedente, $date_choisi, $frequente_tab);
-        //$this->frequentUnique();
-        //exit;
-        //############################################################################
-        //############################################################################  
-   
 
         // Construction du tableau complet contenant les apprenants et les prospects
         if (isset($prospects_tab) && isset($apprenants_tab)) {
@@ -405,7 +396,7 @@ class TableauEffectifsController extends Controller
         }
     }
 
-    protected function ProspectsTab($code_periode_actuel)
+    protected function ProspectsTabPeriode($code_periode_actuel)
     {
         // Premiere requete API on recupere la table des prospects correspondant a la periode scolaire
         // Aucune distinction possible entre les prospects cloturer ou non
@@ -502,7 +493,7 @@ class TableauEffectifsController extends Controller
         
     }
 
-    protected function ProspectsTab2($code_periode_actuel)
+    protected function ProspectsTabEventPeriode($code_periode_actuel)
     {
 
          // Date du jour et on prend un an avant(choix arbitraire) (imposible de rechercher prospect dans le futur la date correspond a la date de l'evenement)
@@ -612,6 +603,101 @@ class TableauEffectifsController extends Controller
         
     }
 
+    protected function ProspectsTab()
+    {
+
+         // Date du jour et on prend un an avant(choix arbitraire) (imposible de rechercher prospect dans le futur la date correspond a la date de l'evenement)
+         $date_debut_prospect = date_create()->modify('-1 year')->format('d-m-Y');
+         $date_fin_prospect = date('d-m-Y');
+ 
+         // /r/v1/formation-longue/prospects-with-events/@codeTypeEvt/@codeEtapeEvt/@dateDebut/@dateFin/@evtClotures
+         // codeTypeEvt trouver avec la table typeEvenement https://citeformations.ymag.cloud/index.php/r/v1/types-evenement
+
+         
+        // on fais Trois requetes a la fonction ProspectEvenement (fait la requete api est renvoi un tableau contenant les codeApprenant)
+        // on recupere le code apprenant des prospects avec l'evenement voulu et on met en cache
+        $api_prospects_tab_recu = Cache::get('api_prospects_tab_recu');
+        if (empty($api_prospects_tab_recu)) {
+            $api_prospects_tab_recu = $this->ApiProspectsEvenement($codeTypeEvt=4, $codeEvenement=8, $date_debut_prospect, $date_fin_prospect, $evtClotures=0);
+            Cache::put('api_prospects_tab_recu', $api_prospects_tab_recu, env('TEMP_CACHE_CONTROLLER'));
+        }
+
+        $api_prospects_tab_reception = Cache::get('api_prospects_tab_reception');
+        if (empty($api_prospects_tab_reception)) {
+            $api_prospects_tab_reception = $this->ApiProspectsEvenement($codeTypeEvt=4, $codeEvenement=151, $date_debut_prospect, $date_fin_prospect, $evtClotures=0);
+            Cache::put('api_prospects_tab_reception', $api_prospects_tab_reception, env('TEMP_CACHE_CONTROLLER'));
+        }
+
+        $api_prospects_tab_envoi = Cache::get('api_prospects_tab_envoi');
+        if (empty($api_prospects_tab_envoi)) {
+            $api_prospects_tab_envoi = $this->ApiProspectsEvenement($codeTypeEvt=4, $codeEvenement=149, $date_debut_prospect, $date_fin_prospect, $evtClotures=0);
+            Cache::put('api_prospects_tab_envoi', $api_prospects_tab_envoi, env('TEMP_CACHE_CONTROLLER'));
+        }
+        
+        $prospect_evenement = array_merge($api_prospects_tab_envoi , $api_prospects_tab_reception, $api_prospects_tab_recu );
+
+        //Creation de la table prospects voulu
+        $prospects_plusieurs_formation = [];
+
+        foreach ($prospect_evenement as  $prospect) {
+
+            //un prospect peu avoir plusieurs evenement racine, on prend le dernier qui correspond au dernier en date
+            $nombre_evenement_racine = count($prospect["evenementsRacines"]); 
+            $dernier_evenement_racine = $prospect["evenementsRacines"][$nombre_evenement_racine - 1]; 
+
+            // si un evenement choisi c'est passe sur la periode mais n'est pas le dernier
+            // on verifie que le dernier evenement et un des bon codeEtape
+            //exemple cas prospects l'annee derniere non cloturé a un bon codeetape et de nouveau prospect
+            $codeEtape = $dernier_evenement_racine["dernierEvenement"]["codeEtapeEvenement"];
+            if ($codeEtape == 8 || $codeEtape == 149 || $codeEtape == 151 ) {
+        
+                //Construction du tableau prsopects
+                //Attention certain prospect on plusieur formation souhaite on prend la premiere 
+                $prospects_tab[$prospect["codeApprenant"]] = array(
+                    "CodeApprenant" =>$prospect["codeApprenant"],
+                    "nomApprenant" => $prospect["nomApprenant"],
+                    "prenomApprenant" => $prospect["prenomApprenant"],
+                    "nomFormation" => $dernier_evenement_racine["formationsSouhaitees"][0]["nomFormation"],
+                    "nomAnnee" => $dernier_evenement_racine["formationsSouhaitees"][0]["nomAnnee"],
+                    "nomStatut" => $dernier_evenement_racine["formationsSouhaitees"][0]["nomStatut"],
+                    "codeEtapeEvenement" => $dernier_evenement_racine["dernierEvenement"]["codeEtapeEvenement"],
+                    "nomEtapeEvenement" => $dernier_evenement_racine["dernierEvenement"]["nomEtapeEvenement"],
+
+                );
+
+                //construction tableau prospect plusieurs formation
+                $nombre_formation = count($dernier_evenement_racine["formationsSouhaitees"]);
+                if ( $nombre_formation > 1) {
+                    
+                    $prospects_plusieurs_formation[$prospect["codeApprenant"]] = array(
+                        "nomApprenant" => $prospect["nomApprenant"],
+                        "prenomApprenant" => $prospect["prenomApprenant"],
+                        );  
+
+                    for ($i=0; $i < $nombre_formation ; $i++) {
+
+                        $prospects_plusieurs_formation[$prospect["codeApprenant"]] += array(
+                            "nomFormation$i" => $dernier_evenement_racine["formationsSouhaitees"][$i]["nomFormation"],
+                            "nomAnnee$i" => $dernier_evenement_racine["formationsSouhaitees"][$i]["nomAnnee"],
+                        );
+                    }  
+                    
+                }        
+
+            }
+    
+        }
+
+        //$prospects_plusieurs_formation = null;
+        //$prospect_evenement = array_merge($prospects_tab_envoi , $prospects_tab_reception, $prospects_tab_recu );
+        //$prospects_tab = null;
+        if (isset($prospects_tab)) {
+            return array("prospects_tab" => $prospects_tab, "prospects_plusieurs_formation" => $prospects_plusieurs_formation );
+        }else {
+            return  null;
+        }
+        
+    }
 
     public function ApprenantsTab($date_choisi,$code_periode_actuel,$code_periode_precedente, $frequente_tab)
     {
@@ -805,7 +891,6 @@ class TableauEffectifsController extends Controller
         $liste_annee_null = [];
         $liste_annee_mauvaise = [];
         $liste_formation_existe_pas = [];
-        $liste_fomation_erasmus = [];
         foreach ($tableau_complet as $individu) {
 
             $mauvaise_annee = True;
@@ -836,25 +921,19 @@ class TableauEffectifsController extends Controller
             //liste des prospects/apprenants avec une formation qui n'est pas dans la basse
             if ($formation_existe_pas) {            
                 if ($individu["nomFormation"] !='ERASMUS POST-APPRENTISSAGE') {
-                    array_push($liste_fomation_erasmus, $individu["CodeApprenant"]);
-                }else{
-                    array_push($liste_formation_existe_pas, $individu["CodeApprenant"]);
-                }            
+                    array_push($liste_formation_existe_pas, $individu["CodeApprenant"]);  
+                }       
             }
 
 
 
         }
-
-        //dump( $tableau_complet);
-        //dump( $liste_annee_mauvaise);
-        //dd( $liste_annee_null);
         
         if (!empty($liste_annee_mauvaise) && !empty($liste_annee_null)) {
             return array('liste_annee_mauvaise' => $liste_annee_mauvaise,
             'liste_annee_null' => $liste_annee_null,
             'liste_formation_existe_pas' => $liste_formation_existe_pas,
-            'liste_fomation_erasmus' => $liste_fomation_erasmus,
+            //'liste_fomation_erasmus' => $liste_fomation_erasmus,
             );
         }else {
             return  null;
