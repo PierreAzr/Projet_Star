@@ -4,7 +4,7 @@ namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
-
+use App\Models\Formations;
 
 class DatabaseSeeder extends Seeder
 {
@@ -23,7 +23,7 @@ class DatabaseSeeder extends Seeder
 
           $data = $this->TableauFormation();
           foreach($data as $formation){
-            \App\Models\Formations::create($formation);
+            Formations::create($formation);
         }
 
         DB::table('users')->insert([
