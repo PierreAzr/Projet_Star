@@ -21,18 +21,6 @@ class TableauEffectifsController extends Controller
 
     public function Effectifs(Request $request)
     {   
-
-        //cache::flush();
-        ini_set('max_execution_time', 180);
-        ini_set('memory_limit', '512M' );
-        $d_microtime = microtime(true);
-        $d_memory = memory_get_usage(true);
-
-        
-        //Recuperation de la table periode 
-        //trouver la periode qui correspond a la date voulu (date du jour par defaut) 
-        //ainsi que la periode n-1
-        //##############################################################"
         
         //On recupere la date s'il y en a une
         $date = $request->get('date');
@@ -189,12 +177,6 @@ class TableauEffectifsController extends Controller
             
 
         }
-
-        $a_microtime = microtime(true);
-        $time = $a_microtime - $d_microtime;
-        $a_memory = memory_get_usage(true);
-        $memory = $a_memory - $d_memory;
-        echo("temps execution : {$time}, Memoire utlisé : {$memory}"); 
         
         return view('mediation.tableaueffectifs')
                 ->with(compact('final_tab'))
