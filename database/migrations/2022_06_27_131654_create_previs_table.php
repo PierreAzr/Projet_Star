@@ -15,7 +15,7 @@ class CreatePrevisTable extends Migration
     {
         Schema::create('previs', function (Blueprint $table) {
             $table->id();
-            $table->integer('idFormation')->unsigned();
+            $table->bigInteger('idFormation')->unsigned();
             $table->foreign('idFormation')->references('id')->on('formations');
             $table->integer('previ');
             $table->string('periode');
