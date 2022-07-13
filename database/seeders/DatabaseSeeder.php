@@ -21,10 +21,15 @@ class DatabaseSeeder extends Seeder
 
  
 
-          $data = $this->TableauFormation();
+/*           $data = $this->TableauFormation();
           foreach($data as $formation){
             Formations::create($formation);
-        }
+        } */
+
+        $data = $this->TableauFormation();
+        foreach($data as $formation){
+          DB::table('formations')->insert($formation);
+      } 
 
         DB::table('users')->insert([
           'name' => 'user',
