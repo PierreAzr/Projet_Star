@@ -20,13 +20,14 @@ trait ApiRequestTrait {
         $header_token = "X-Auth-Token";
 
         // ATTENTION uniquement en LOCAL withoutVerifying permet de pas controler les certificat
+        /*         
         $response = Http::withoutVerifying()
         ->withHeaders([$header_token => $token_api])
         ->withOptions(["verify"=>false])
-        ->get($url);
+        ->get($url); */
 
         //Sur serveur
-        //$response = Http::withHeaders([$header_token => $token_api])->get($url);
+        $response = Http::withHeaders([$header_token => $token_api])->get($url);
         
         //on test si la reponse et mauvaise
         if ($response->successful() ==  false) {
