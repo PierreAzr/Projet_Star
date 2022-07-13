@@ -16,8 +16,6 @@ trait ApiRequestTrait {
     //Appel API
     protected function ApiCall($url) {
 
-        echo("**ApiCall : {$url}");
-        echo("********************");
         $token_api = env('TOKEN_YPAREO');
         $header_token = "X-Auth-Token";
 

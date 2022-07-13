@@ -10,20 +10,13 @@
 
 <!--Information, Choix date, Enregistrement previs -->
 <div class="row">
-    <div class="col-3 d-flex justify-content-center">
-        @if(!empty($erreur))
-        <a href="#erreur">
-        <button class="btn btn-danger" >Plusieurs Erreurs cliquez pour voir</button>
-        </a>
-        @endif
-    </div>
-    <div class="col-3 d-inline-flex justify-content-end">
+    <div class="col-3 offset-3 d-inline-flex justify-content-end">
         <div>
-            <div class="d-flex p-2 bg-Secondary text-white">{{ $periode_actuel }}</div>  
+            <div class="d-flex p-2 bg-Primary text-white">{{ $periode_actuel }}</div>  
         </div>
         <div>
             @php($date_format = date_create_from_format('Y-m-d', $date )->format('d-m-Y'))
-            <div class="d-flex p-2 ms-2 bg-Secondary text-white">{{ $date_format }}</div> 
+            <div class="d-flex p-2 ms-2 bg-Primary text-white">{{ $date_format }}</div> 
         </div>   
     </div >
 
@@ -74,7 +67,7 @@
                         
                         @endif
                         @if( $key  == "liste_annee_mauvaise")
-                        <p>Prospect avec un mauvais nom d'année*</p> 
+                        <p>Le nom d'année n'est pas associé a la formation dans le tableau*</p> 
                         @endif
                         @if( $key  == "liste_formation_existe_pas")
                         <div>Le nom de la formation n'est pas dans le tableau* </div>
@@ -101,12 +94,12 @@
 <div class="row mb-10">
     <div class="col-12 mb-10 d-inline-flex justify-content-center">
    
-            <div class="d-flex p-2 bg-Secondary text-white">Envoi pré contrat : {{ $total_tab["preContrat"] }}</div>  
-            <div class="d-flex p-2 ms-2 bg-Secondary text-white">Reception pré contrat : {{ $total_tab["receptionContrat"] }}</div>
-            <div class="d-flex p-2 ms-2 bg-Secondary text-white">Contrat recu : {{ $total_tab["contratRecu"] }}</div>
-            <div class="d-flex p-2 ms-2 bg-Secondary text-white">Nouveau inscrit : {{ $total_tab["nouveau"] }}</div>
-            <div class="d-flex p-2 ms-2 bg-Secondary text-white">inscrit N-1 : {{ $total_tab["ancient"] }}</div>
-            <div class="d-flex p-2 ms-2 bg-Secondary text-white">Total : {{ $total_tab["total"] }}</div> 
+            <div class="d-flex p-2 border border-dark couleurtableaueffectis2">Envoi pré contrat : {{ $total_tab["preContrat"] }}</div>  
+            <div class="d-flex p-2 ms-2 border border-dark couleurtableaueffectis2">Reception pré contrat : {{ $total_tab["receptionContrat"] }}</div>
+            <div class="d-flex p-2 ms-2 border border-dark couleurtableaueffectis2">Contrat recu : {{ $total_tab["contratRecu"] }}</div>
+            <div class="d-flex p-2 ms-2 border border-dark couleurtableaueffectis3">Nouveau inscrit : {{ $total_tab["nouveau"] }}</div>
+            <div class="d-flex p-2 ms-2 border border-dark couleurtableaueffectis3">inscrit N-1 : {{ $total_tab["ancient"] }}</div>
+            <div class="d-flex p-2 ms-2  border border-dark couleurtableaueffectis1">Total : {{ $total_tab["total"] }}</div> 
 
     </div>
 </div>
@@ -122,9 +115,9 @@
     <input id="prodId" name="periode" type="hidden" value="{{ $periode_actuel }}">
     <input id="prodId2" name="date" type="hidden" value="{{ $date }}">
     <br>
-    <table id="table_id" class="display">
-        <thead>
-            <tr>
+    <table id="table_id" class="table">
+        <thead class="table-bordered">
+            <tr >
                 <th>Secteurs</th>
                 <th>Formations</th>
                 <th>Années</th>
@@ -159,27 +152,28 @@
                 <td></td>
             </tr>
             @foreach ($final_tab as $formation)
-            <tr> 
-                <td class="" style='background-color:   #aed6f1 '>{{ $formation["nomSecteurActivite"] }}</td>
-                <td style='background-color:   #aed6f1 '>{{ $formation["nomFormation"] }}</td>
-                <td style='background-color:   #aed6f1 '>{{ $formation["nomAnnee"] }}</td>
-                <td style='background-color:   #ebf5fb   '>{{ $formation["preContrat"] }}</td>
-                <td style='background-color:   #ebf5fb  '>{{ $formation["receptionContrat"] }}</td>
-                <td style='background-color:   #ebf5fb  '>{{ $formation["contratRecu"] }}</td>
-                <td style='background-color:    #d6eaf8'>{{ $formation["nouveau"] }}</td>
-                <td style='background-color:   #d6eaf8 '>{{ $formation["ancient"] }}</td>
-                <td style='background-color:   #aed6f1 '>{{ $formation["total"] }}</td>
-                <td style='background-color: #fdedec'>{{ $formation["capaciteMax"] }}</td>
-                <td style='background-color: #f5b7b1'>{{ $formation["nbPlacePossible"] }}</td>
-                <td style='background-color:  #fcf3cf '>             
+            <tr scope="row"> 
+
+                <td scope="col" class="couleurtableaueffectis1">{{ $formation["nomSecteurActivite"] }}</td>
+                <td scope="col"class="couleurtableaueffectis1">{{ $formation["nomFormation"] }}</td>
+                <td class="couleurtableaueffectis1">{{ $formation["nomAnnee"] }}</td>
+                <td class="couleurtableaueffectis2">{{ $formation["preContrat"] }}</td>
+                <td class="couleurtableaueffectis2">{{ $formation["receptionContrat"] }}</td>
+                <td class="couleurtableaueffectis2">{{ $formation["contratRecu"] }}</td>
+                <td class="couleurtableaueffectis3">{{ $formation["nouveau"] }}</td>
+                <td class="couleurtableaueffectis3">{{ $formation["ancient"] }}</td>
+                <td class="couleurtableaueffectis1">{{ $formation["total"] }}</td>
+                <td class="couleurtableaueffectis4">{{ $formation["capaciteMax"] }}</td>
+                <td class="couleurtableaueffectis5">{{ $formation["nbPlacePossible"] }}</td>
+                <td class="couleurtableaueffectis6">             
                     @if(!empty($formation["previ"]))
                         <input size="1" type="text" name="{{ $formation['idFormation'] }}" id="{{ $formation['idFormation'] }}" value='{{ $formation["previ"] }}'>
                     @else
                         <input size="1" type="text" name="{{ $formation['idFormation'] }}" id="{{ $formation['idFormation'] }}" value='0'>    
                     @endif
                 </td>
-                <td style='background-color:   #f9e79f  '>{{ $formation["previTotal"] }}</td>
-                <td  style='background-color: ' >
+                <td class="couleurtableaueffectis7">{{ $formation["previTotal"] }}</td>
+                <td >
 
                     <!-- Modal pour afficher le detail d'une formation -->
 
@@ -195,8 +189,8 @@
                                 <h5 class="modal-title" id="modalprevis{{ $formation['idFormation'] }}Label">{{ $formation["nomFormation"] }} {{ $formation["nomAnnee"] }}</h5>
                                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                             </div>
-                            <div class="modal-body">
-                                <table id="table_{{ $formation['idFormation'] }}" class="display">
+                            <div class="modal-body table-responsive">
+                                <table id="table_{{ $formation['idFormation'] }}" class="table table-bordered">
                                         <thead>
                                             <tr>
                                                 <th>Nom</th>
@@ -257,13 +251,10 @@
                     <script>
                             $(document).ready( function () {
                                     $("#table_{{ $formation['idFormation'] }}").DataTable({
-                                        fixedHeader: {
-                                                header: true,
-                                                },
                                         language: {
                                             url: 'http:////cdn.datatables.net/plug-ins/1.12.1/i18n/fr-FR.json'
                                         },
-                                        lengthMenu: [10, 50]
+                                        lengthMenu:[ [  10 , -1], [ 10, "Tous"  ] ],
                                     });
                                 } );
                     </script>
@@ -319,20 +310,20 @@
 
 <hr>
 
-<!-- Formation multiple, stagiaire - 15 -->
+<!-- Formation multiple, apprenants et prospects -->
 <div class="row">
     <div class="accordion" id="accordionExample">
-
+        @if(!empty($prospects_plusieurs_formation))   
         <div class="accordion-item">
             <h2 class="accordion-header" id="headingOne">
             <button class="accordion-button collapsed fw-bold" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne" aria-expanded="false" aria-controls="collapseOne">
-            Prospects avec plusieurs Formations
+            Prospects avec plusieurs Formations ({{count($prospects_plusieurs_formation)}})
             </button>
             </h2>
             <div id="collapseOne" class="accordion-collapse collapse" aria-labelledby="headingOne" data-bs-parent="#accordionExample">
             <div class="accordion-body">
-                @if(!empty($prospects_plusieurs_formation))      
-                <table class="table">
+                   
+                <table class="table" >
                 <thead>
                     <tr>
                         <th>Nom</th>
@@ -356,52 +347,19 @@
                     @endforeach
                 </tbody>
                 </table> 
-                @else
-                    <strong>Aucun Prospects avec plusieurs formation.</strong>
-                @endif           
+
+                          
             </div>
-            </div>
+            </div>     
         </div>
+        @endif 
 
-        <div class="accordion-item">
-            <h2 class="accordion-header" id="headingTwo">
-            <button class="accordion-button collapsed fw-bold" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
-            Stagiaire - 15 ans
-            </button>
-            </h2>
-            <div id="collapseTwo" class="accordion-collapse collapse" aria-labelledby="headingTwo" data-bs-parent="#accordionExample">
-            <div class="accordion-body">
-                <table class="table">
-                    <thead>
-                        <tr>
-                            <th>Nom</th>
-                            <th>Prénom</th>
-                            <th>Formation</th>
-                            <th>Année</th>
-                        </tr>
-                    </thead>
-                    <tbody> 
-                    @foreach($tableau_complet as $individu)
-                    @if ($individu['nomStatut'] == "Stagiaire - 15 ans") 
-                        <tr>
-                            <td>{{ $individu["nomApprenant"] }}</td>
-                            <td>{{ $individu["prenomApprenant"] }}</td>
-                            <td>{{ $individu["nomFormation"] }}</td>
-                            <td>{{ $individu["nomAnnee"] }}</td>
-                        </tr>
-                        @endif
-                        @endforeach
-                    </tbody>
-                </table>
-            </div>
-            </div>
-        </div>
-
-
+        @if(!empty($commun_tab))
         <div class="accordion-item">
             <h2 class="accordion-header" id="headingThree">
             <button class="accordion-button collapsed fw-bold" type="button" data-bs-toggle="collapse" data-bs-target="#collapseThree" aria-expanded="false" aria-controls="collapseThree">
                 Apprenant et Prospect à la fois ({{count($commun_tab)}})
+                
             </button>
             </h2>
             <div id="collapseThree" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#accordionExample">
@@ -434,6 +392,7 @@
             </div>
             </div>
         </div>
+        @endif
 
     </div>
 </div>
@@ -443,9 +402,9 @@
 <script>
     $(document).ready( function () {
         var table = $('#table_id').DataTable({
-                fixedHeader: {
-                         header: true,
-                        },
+            //dom: 'Blfrtip',
+                //buttons: ['pdf', 'print'], 
+  
                 language: {
                     url: 'http:////cdn.datatables.net/plug-ins/1.12.1/i18n/fr-FR.json'
                 },
