@@ -23,11 +23,11 @@ class TableauEffectifsController extends Controller
     public function Effectifs(Request $request)
     {   
         //cache::flush();
-        $test = Previs::get();
+ /*        $test = Previs::get();
         dump($test);
         $formations = Formations::get(); 
         dd( $formations);
-        exit;
+        exit; */
         
         //On recupere la date s'il y en a une
         $date = $request->get('date');
