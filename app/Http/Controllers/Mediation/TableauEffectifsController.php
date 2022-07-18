@@ -160,7 +160,7 @@ class TableauEffectifsController extends Controller
         //## Requete de la base de donnée
         $formations = Formations::get(); 
 
-        $previs = Previ::where('previs.periode', $periode_actuel)->get();
+        $previs = Previs::where('previs.periode', $periode_actuel)->get();
 
         // On compte par formation le nombre individu qui correspond aux colonne voulu
         //Construction du tableau final et du tableau total pour la vue
@@ -558,7 +558,7 @@ class TableauEffectifsController extends Controller
         foreach ($request->input() as $key => $value) {
             if (is_int($key)) {      
                 if(is_numeric($value)) {      
-                    Previ::updateOrCreate(
+                    Previs::updateOrCreate(
                         ['idFormation' => $key, 'periode' => $periode],
                         ['previ' => $value ]
                     );
