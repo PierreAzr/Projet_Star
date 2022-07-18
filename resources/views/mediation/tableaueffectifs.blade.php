@@ -201,6 +201,7 @@
                                             <tr>
                                                 <th>Nom</th>
                                                 <th>Prénom</th>
+                                                <th>Groupe</th>
                                                 <th>Statut</th>
                                                 <th>Nouveau</th>
                                                 <th>Evenement</th>
@@ -214,6 +215,11 @@
                                                 <tr>
                                                     <td>{{ $individu["nomApprenant"] }}</td>
                                                     <td>{{ $individu["prenomApprenant"] }}</td>
+                                                    @if(empty($individu["nomGroupe"]))
+                                                        <td></td>
+                                                    @else
+                                                        <td>{{ $individu["nomGroupe"] }}</td>
+                                                    @endif
                                                     @if(empty($individu["nomStatut"]))
                                                         <td></td>
                                                     @else

@@ -28,7 +28,30 @@ class TableauEffectifsController extends Controller
         $formations = Formations::get(); 
         dd( $formations);
         exit; */
-        
+        //1033599, 1033605, 1094842, 
+
+         // $api_data_prospects = Cache::get('api_prospects_tab_envoi');
+        //$api_data_apprenants = $this->ApiApprenants();
+       // dd($api_data_apprenants[0]);
+        /* $codeApprenant = ;
+        foreach ($api_data_apprenants as $apprenant) {          
+            if ($apprenant["codeApprenant"] == $codeApprenant) { 
+                echo("apprenant: $codeApprenant");   
+                dump($apprenant);   
+            }   
+        }
+        foreach ($api_data_prospects as $prospect) {
+            if ($prospect["codeApprenant"] ==  $codeApprenant ){  
+                echo('prospect');          
+                dump($prospect);
+            }
+        }  */
+        //exit; 
+
+        //ini_set('max_execution_time', 180);
+       // ini_set('memory_limit', '512M' );
+
+
         //On recupere la date s'il y en a une
         $date = $request->get('date');
 
@@ -87,7 +110,7 @@ class TableauEffectifsController extends Controller
             $previs = Cache::get('previ_date_vide');
 
             if (isset($tableau_complet) && isset($final_tab) && isset($total_tab) && isset($prospects_plusieurs_formation) && isset($erreur) && isset($commun_tab)) {       
-                echo("***********datevide***********");
+                
                 return view('mediation.tableaueffectifs')
                 ->with(compact('final_tab'))
                 ->with(compact('total_tab'))
@@ -175,7 +198,7 @@ class TableauEffectifsController extends Controller
 
         // mise en cache dans le cas ou la date est vide et donc on prend la date du jour
         if(isset($date_vide)){
-            echo('sesesese  set date vide seseseeseees');
+            
             Cache::put('final_tab_date_vide', $final_tab, env('TEMP_CACHE_CONTROLLER'));
             Cache::put('total_tab_date_vide', $total_tab, env('TEMP_CACHE_CONTROLLER'));
             Cache::put('tableau_complet_date_vide', $tableau_complet, env('TEMP_CACHE_CONTROLLER'));
@@ -299,6 +322,13 @@ class TableauEffectifsController extends Controller
             Cache::put('entreprises_tab', $entreprises_tab, env('TEMP_CACHE_CONTROLLER'));
         }
 
+
+        $api_data_groupes = $this->ApiGroupes($code_periode_actuel);
+        $count = 0;
+        foreach ($api_data_groupes as $key => $groupe) {
+            $groupe_tab[$groupe["codeGroupe"]] = $groupe["nomGroupe"];
+        }
+
         //## requete api
         $api_data_apprenants = $this->ApiApprenants($code_periode_actuel);
 
@@ -345,6 +375,13 @@ class TableauEffectifsController extends Controller
                         "dateDebContrat" => $contrats_tab[$apprenant["codeApprenant"]]["dateDebContrat"],
                         "nomEntreprise" => $entreprises_tab[ $code_entreprise ]
                         //"nomEntreprise" => $entreprises_tab[ $contrat[$apprenant["codeApprenant"]]["codeEntreprise"] ]["nomEntreprise"]
+                    );
+
+                }
+
+                if (!empty($groupe_tab[$apprenant["informationsCourantes"]["codeGroupe"]])) {      
+                    $apprenants_tab[$apprenant["codeApprenant"]] += array(
+                        "nomGroupe" => $groupe_tab[$apprenant["informationsCourantes"]["codeGroupe"]],
                     );
 
                 }
@@ -519,8 +556,6 @@ class TableauEffectifsController extends Controller
                 "nomSecteurActivite" => $formation["nomSecteurActivite"], 
                 "nomFormation" => $formation["nomFormation"],
                 "nomAnnee" => $formation["nomAnnee"],
-                "previ" => $formation["previ"],
-                "previTotal" => $count + $formation["previ"],
                 "preContrat" => $pre_contrat,
                 "receptionContrat" => $reception_contrat,
                 "contratRecu" => $contrat_recu,
