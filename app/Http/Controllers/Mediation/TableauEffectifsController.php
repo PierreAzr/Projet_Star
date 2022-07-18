@@ -13,7 +13,7 @@ use App\Traits\ApiRequestTrait;
 use Illuminate\Support\Facades\Cache;
 
 use App\Models\Formations;
-use App\Models\Previ;
+use App\Models\Previs;
 
 class TableauEffectifsController extends Controller
 {
@@ -23,6 +23,8 @@ class TableauEffectifsController extends Controller
     public function Effectifs(Request $request)
     {   
         //cache::flush();
+        $test = Previs::get();
+        dd($test);
         $formations = Formations::get(); 
         dd( $formations);
         exit;
