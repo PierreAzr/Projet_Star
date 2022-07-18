@@ -8,11 +8,12 @@ use Illuminate\Http\Request;
 
 use App\Traits\ApiRequestTrait;
 
-//pour utilise requete api
-use Illuminate\Support\Facades\Http;
+
 //mise en cache
 use Illuminate\Support\Facades\Cache;
-use Illuminate\Support\Facades\Session;
+
+use App\Models\Formations;
+use App\Models\Previ;
 
 class TableauEffectifsController extends Controller
 {
@@ -21,6 +22,7 @@ class TableauEffectifsController extends Controller
 
     public function Effectifs(Request $request)
     {   
+        //cache::flush();
         
         //On recupere la date s'il y en a une
         $date = $request->get('date');
@@ -70,16 +72,16 @@ class TableauEffectifsController extends Controller
         //Si la date_choisi est la date du jour on recupere le cache
         //$date_vide = null;
         if(!empty($date_vide)){
-            echo("***********datevide***********");
+
             $tableau_complet = Cache::get('tableau_complet_date_vide');
             $final_tab = Cache::get('final_tab_date_vide');
             $total_tab = Cache::get('total_tab_date_vide');     
             $prospects_plusieurs_formation = Cache::get('prospects_plusieurs_formation_date_vide');
             $erreur = Cache::get('erreur_date_vide');
             $commun_tab = Cache::get('commun_tab_date_vide');
+            $previs = Cache::get('previ_date_vide');
 
-            if (isset($tableau_complet) && isset($final_tab) && isset($total_tab) && isset($prospects_plusieurs_formation) && isset($erreur) && isset($commun_tab)) {
-         
+            if (isset($tableau_complet) && isset($final_tab) && isset($total_tab) && isset($prospects_plusieurs_formation) && isset($erreur) && isset($commun_tab)) {       
                 echo("***********datevide***********");
                 return view('mediation.tableaueffectifs')
                 ->with(compact('final_tab'))
@@ -87,6 +89,7 @@ class TableauEffectifsController extends Controller
                 ->with(compact('tableau_complet'))
                 ->with(compact('date'))
                 ->with(compact('periode_actuel'))
+                ->with(compact('previs'))
                 ->with(compact('prospects_plusieurs_formation'))
                 ->with(compact('erreur'))
                 ->with(compact('commun_tab'));
@@ -150,10 +153,12 @@ class TableauEffectifsController extends Controller
        
 
         //## Requete de la base de donnée
-        $formations = \App\Models\Formations::join('previs', 'previs.idFormation', '=', 'formations.id')
+        $formations = Formations::join('previs', 'previs.idFormation', '=', 'formations.id')
         ->where('previs.periode', $periode_actuel)
         ->get(['formations.*', 'previs.*']); 
-        
+
+        $previs = Previ::where('previs.periode', $periode_actuel)->get();
+
         // On compte par formation le nombre individu qui correspond aux colonne voulu
         //Construction du tableau final et du tableau total pour la vue
         $liste_tableau = $this->ConstructionTableauFinal($tableau_complet, $formations);
@@ -174,6 +179,7 @@ class TableauEffectifsController extends Controller
             Cache::put('prospects_plusieurs_formation_date_vide', $prospects_plusieurs_formation, env('TEMP_CACHE_CONTROLLER'));
             Cache::put('erreur_date_vide', $erreur, env('TEMP_CACHE_CONTROLLER'));
             Cache::put('commun_tab_date_vide', $commun_tab, env('TEMP_CACHE_CONTROLLER'));
+            Cache::put('previ_date_vide', $previs, env('TEMP_CACHE_CONTROLLER'));
             
 
         }
@@ -184,6 +190,7 @@ class TableauEffectifsController extends Controller
                 ->with(compact('tableau_complet'))
                 ->with(compact('date'))
                 ->with(compact('periode_actuel'))
+                ->with(compact('previs'))
                 ->with(compact('prospects_plusieurs_formation'))
                 ->with(compact('erreur'))
                 ->with(compact('commun_tab'));
@@ -548,7 +555,7 @@ class TableauEffectifsController extends Controller
         foreach ($request->input() as $key => $value) {
             if (is_int($key)) {      
                 if(is_numeric($value)) {      
-                    $previ = \App\Models\Previ::updateOrCreate(
+                    Previ::updateOrCreate(
                         ['idFormation' => $key, 'periode' => $periode],
                         ['previ' => $value ]
                     );

@@ -166,13 +166,19 @@
                 <td class="couleurtableaueffectis4">{{ $formation["capaciteMax"] }}</td>
                 <td class="couleurtableaueffectis5">{{ $formation["nbPlacePossible"] }}</td>
                 <td class="couleurtableaueffectis6">             
-                    @if(!empty($formation["previ"]))
-                        <input size="1" type="text" name="{{ $formation['idFormation'] }}" id="{{ $formation['idFormation'] }}" value='{{ $formation["previ"] }}'>
-                    @else
-                        <input size="1" type="text" name="{{ $formation['idFormation'] }}" id="{{ $formation['idFormation'] }}" value='0'>    
+                @php($previ_total = null )
+                @foreach($previs as $previ)
+                    @if($previ->periode == $periode_actuel && $previ->idFormation == $formation['idFormation'])
+                        <input size="1" type="text" name="{{ $formation['idFormation'] }}" id="{{ $formation['idFormation'] }}" value='{{ $previ->previ }}'>
+                        @php($previ_total = $formation["total"] + $previ->previ )
                     @endif
+                @endforeach  
+                @if(!isset($previ_total)) 
+                    <input size="1" type="text" name="{{ $formation['idFormation'] }}" id="{{ $formation['idFormation'] }}" value='0'>
+                    @php($previ_total = $formation["total"])
+                @endif
                 </td>
-                <td class="couleurtableaueffectis7">{{ $formation["previTotal"] }}</td>
+                <td class="couleurtableaueffectis7">{{ $previ_total }}</td>
                 <td >
 
                     <!-- Modal pour afficher le detail d'une formation -->
