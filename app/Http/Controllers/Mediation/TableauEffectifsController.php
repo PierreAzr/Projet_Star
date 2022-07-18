@@ -23,6 +23,9 @@ class TableauEffectifsController extends Controller
     public function Effectifs(Request $request)
     {   
         //cache::flush();
+        $formations = Formations::get(); 
+        dd( $formations);
+        exit;
         
         //On recupere la date s'il y en a une
         $date = $request->get('date');
@@ -153,9 +156,7 @@ class TableauEffectifsController extends Controller
        
 
         //## Requete de la base de donnée
-        $formations = Formations::join('previs', 'previs.idFormation', '=', 'formations.id')
-        ->where('previs.periode', $periode_actuel)
-        ->get(['formations.*', 'previs.*']); 
+        $formations = Formations::get(); 
 
         $previs = Previ::where('previs.periode', $periode_actuel)->get();
 
