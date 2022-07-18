@@ -24,7 +24,7 @@ class TableauEffectifsController extends Controller
     {   
         //cache::flush();
         $test = Previs::get();
-        dd($test);
+        dump($test);
         $formations = Formations::get(); 
         dd( $formations);
         exit;
