@@ -33,7 +33,7 @@
 
     <div class="col-3 d-flex justify-content-start">
         <div>
-            <button type="button" class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#modalprevis">Sauvgarder prévisionnels</button>
+            <button type="button" class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#modalprevis">Sauvegarder prévisionnels</button>
         </div>
     </div>
 
@@ -283,7 +283,7 @@
     <!-- Button modal Enregistrement-->
     <div class="col-12 d-flex justify-content-center">
         <div>
-            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalprevis">Sauvgarder prévisionnels</button>
+            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalprevis">Sauvegarder prévisionnels</button>
         </div>
     </div>
   
@@ -293,7 +293,7 @@
         <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="modalprevisLabel">Sauvgarder prévisionnels</h5>
+                <h5 class="modal-title" id="modalprevisLabel">Sauvegarder prévisionnels</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">

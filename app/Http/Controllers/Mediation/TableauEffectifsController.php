@@ -23,6 +23,7 @@ class TableauEffectifsController extends Controller
     public function Effectifs(Request $request)
     {   
 
+
         //On recupere la date s'il y en a une
         $date = $request->get('date');
 
