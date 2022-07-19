@@ -215,6 +215,7 @@ class TableauEffectifsController extends Controller
                             
                 $frequente_tab[$frequente["codeApprenant"]] = array(
                     "codeApprenant" => $frequente["codeApprenant"],
+                    "codeGroupe" => $frequente["codeGroupe"],
                 );
 
             }
@@ -299,8 +300,7 @@ class TableauEffectifsController extends Controller
 
 
         $api_data_groupes = $this->ApiGroupes($code_periode_actuel);
-        $count = 0;
-        foreach ($api_data_groupes as $key => $groupe) {
+        foreach ($api_data_groupes as $groupe) {
             $groupe_tab[$groupe["codeGroupe"]] = $groupe["nomGroupe"];
         }
 
@@ -353,10 +353,10 @@ class TableauEffectifsController extends Controller
                     );
 
                 }
-
-                if (!empty($groupe_tab[$apprenant["informationsCourantes"]["codeGroupe"]])) {      
+                $codeGroupe = $frequente_tab[$apprenant["codeApprenant"]]["codeGroupe"];
+                if (!empty($groupe_tab[$codeGroupe])) {      
                     $apprenants_tab[$apprenant["codeApprenant"]] += array(
-                        "nomGroupe" => $groupe_tab[$apprenant["informationsCourantes"]["codeGroupe"]],
+                        "nomGroupe" => $groupe_tab[$codeGroupe],
                     );
 
                 }
