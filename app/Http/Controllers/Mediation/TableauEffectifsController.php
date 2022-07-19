@@ -22,35 +22,6 @@ class TableauEffectifsController extends Controller
 
     public function Effectifs(Request $request)
     {   
-        //cache::flush();
- /*        $test = Previs::get();
-        dump($test);
-        $formations = Formations::get(); 
-        dd( $formations);
-        exit; */
-        //1033599, 1033605, 1094842, 
-
-         // $api_data_prospects = Cache::get('api_prospects_tab_envoi');
-        //$api_data_apprenants = $this->ApiApprenants();
-       // dd($api_data_apprenants[0]);
-        /* $codeApprenant = ;
-        foreach ($api_data_apprenants as $apprenant) {          
-            if ($apprenant["codeApprenant"] == $codeApprenant) { 
-                echo("apprenant: $codeApprenant");   
-                dump($apprenant);   
-            }   
-        }
-        foreach ($api_data_prospects as $prospect) {
-            if ($prospect["codeApprenant"] ==  $codeApprenant ){  
-                echo('prospect');          
-                dump($prospect);
-            }
-        }  */
-        //exit; 
-
-        //ini_set('max_execution_time', 180);
-       // ini_set('memory_limit', '512M' );
-
 
         //On recupere la date s'il y en a une
         $date = $request->get('date');
@@ -92,7 +63,7 @@ class TableauEffectifsController extends Controller
 
         // si la periode n'existe pas on renvoi le tableau avec la date d'aujourdui
         if(!isset($code_periode_actuel)){
-            return redirect()->route('relation_entreprise_index')->with('flash_message', "La date correspond a une periode qui n'existe pas encore")
+            return redirect()->route('mediation_tableau_effectifs')->with('flash_message', "La date correspond a une periode qui n'existe pas encore")
             ->with('flash_type', 'alert-danger');
         }
 
@@ -175,13 +146,17 @@ class TableauEffectifsController extends Controller
             $tableau_complet = $prospects_tab;
 
         }else{
-            return redirect()->route('relation_entreprise_index')->with('flash_message', "La date correspond à une periode qui existe mais il n'y a encore ni prospects ni apprenant")
+            return redirect()->route('mediation_tableau_effectifs')->with('flash_message', "La date correspond à une periode qui existe mais il n'y a encore ni prospects ni apprenant")
             ->with('flash_type', 'alert-danger');  
         }
        
 
         //## Requete de la base de donnée
         $formations = Formations::get(); 
+        if (empty($formations)) {
+            return redirect()->route('welcome')->with('flash_message', "La table formations de la base de donnée est vide.")
+            ->with('flash_type', 'alert-danger');  
+        }
 
         $previs = Previs::where('previs.periode', $periode_actuel)->get();
 

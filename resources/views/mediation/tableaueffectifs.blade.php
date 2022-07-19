@@ -12,11 +12,11 @@
 <div class="row">
     <div class="col-3 offset-3 d-inline-flex justify-content-end">
         <div>
-            <div class="d-flex p-2 bg-Primary text-white">{{ $periode_actuel }}</div>  
+            <div class="d-flex p-2 bg-primary text-white">{{ $periode_actuel }}</div>  
         </div>
         <div>
             @php($date_format = date_create_from_format('Y-m-d', $date )->format('d-m-Y'))
-            <div class="d-flex p-2 ms-2 bg-Primary text-white">{{ $date_format }}</div> 
+            <div class="d-flex p-2 ms-2 bg-primary text-white">{{ $date_format }}</div> 
         </div>   
     </div >
 
@@ -264,7 +264,7 @@
                             $(document).ready( function () {
                                     $("#table_{{ $formation['idFormation'] }}").DataTable({
                                         language: {
-                                            url: 'http:////cdn.datatables.net/plug-ins/1.12.1/i18n/fr-FR.json'
+                                            url: 'https://cdn.datatables.net/plug-ins/1.12.1/i18n/fr-FR.json'
                                         },
                                         lengthMenu:[ [  10 , -1], [ 10, "Tous"  ] ],
                                     });
@@ -418,7 +418,7 @@
                 //buttons: ['pdf', 'print'], 
   
                 language: {
-                    url: 'http:////cdn.datatables.net/plug-ins/1.12.1/i18n/fr-FR.json'
+                    url: cdn_fr_datatable
                 },
                 lengthMenu: [ [-1, 10, 25 ], ["Tous", 10, 25  ] ],
 

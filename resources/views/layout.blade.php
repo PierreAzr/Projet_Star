@@ -170,5 +170,7 @@
 
          });
 
+         let cdn_fr_datatable = 'https://cdn.datatables.net/plug-ins/1.12.1/i18n/fr-FR.json';
+
     </script>
 </html>
