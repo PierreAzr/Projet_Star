@@ -51,7 +51,7 @@
     <br>
     <div class="card border-danger">
         <div class="card-header text-white bg-danger">
-            <h3 id="erreur">Erreur apprenant exclu du tableau</h3>
+            <h3>Erreur apprenant exclu du tableau <a class="link-light" href="#erreur">Détails</a></h3>
         </div>
         <div class="card-body">
             <table class="table">
@@ -63,14 +63,14 @@
                 <tr>
                     <th scope="row">
                         @if( $key  == "liste_annee_null")
-                        <p>Prospect avec un nom d'année null</p>
+                        <p>Prospect avec un nom d'année null ({{count($list)}})</p>
                         
                         @endif
                         @if( $key  == "liste_annee_mauvaise")
-                        <p>Le nom d'année n'est pas associé a la formation dans le tableau*</p> 
+                        <p>Le nom d'année n'est pas associé a la formation dans le tableau* ({{count($list)}})</p> 
                         @endif
                         @if( $key  == "liste_formation_existe_pas")
-                        <div>Le nom de la formation n'est pas dans le tableau* </div>
+                        <div>Le nom de la formation n'est pas dans le tableau* ({{count($list)}})</div>
                         @endif
                     </th>
                     <td>
@@ -84,6 +84,7 @@
                 </tr>
                 @endforeach
             </table>
+            
             <span class="fw-lighter" >* Si nouvelle formation ou nouveau nom d'année, contacter le service informatique</span>
         </div>
     </div>
@@ -267,7 +268,7 @@
                             $(document).ready( function () {
                                     $("#table_{{ $formation['idFormation'] }}").DataTable({
                                         language: {
-                                            url: 'https://cdn.datatables.net/plug-ins/1.12.1/i18n/fr-FR.json'
+                                            url: cdn_fr_datatable
                                         },
                                         lengthMenu:[ [  10 , -1], [ 10, "Tous"  ] ],
                                     });
@@ -410,7 +411,7 @@
         @endif
 
         @if(!empty($erreur))
-        <div class="accordion-item">
+        <div id="erreur" class="accordion-item">
             <h2 class="accordion-header" id="headingFour">
             <button class="accordion-button collapsed fw-bold" type="button" data-bs-toggle="collapse" data-bs-target="#collapseFour" aria-expanded="false" aria-controls="collapseFour">
                 Erreur Details ({{count($erreur['individu_erreur_tab'])}})
