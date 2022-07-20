@@ -74,9 +74,12 @@
                         @endif
                     </th>
                     <td>
-                    @foreach($list as $key => $Apprenat)
-                        {{ $Apprenat }},
-                    @endforeach
+                    @if( $key  != "individu_erreur_tab")
+                        @foreach($list as $Apprenant)
+                            {{ $Apprenant }},
+                        @endforeach
+                    @endif
+
                     </td>
                 </tr>
                 @endforeach
@@ -405,6 +408,51 @@
             </div>
         </div>
         @endif
+
+        @if(!empty($erreur))
+        <div class="accordion-item">
+            <h2 class="accordion-header" id="headingFour">
+            <button class="accordion-button collapsed fw-bold" type="button" data-bs-toggle="collapse" data-bs-target="#collapseFour" aria-expanded="false" aria-controls="collapseFour">
+                Erreur Details ({{count($erreur['individu_erreur_tab'])}})
+                
+            </button>
+            </h2>
+            <div id="collapseFour" class="accordion-collapse collapse" aria-labelledby="headingFour" data-bs-parent="#accordionExample">
+            <div class="accordion-body">
+                
+            <table class="table">
+                    <thead>
+                        <tr>
+                            <th>code</th>
+                            <th>Nom</th>
+                            <th>Prénom</th>
+                            <th>Formation</th>
+                            <th>Année</th>
+                            <th>Erreur</th>
+
+
+                        </tr>
+                    </thead>
+                    <tbody> 
+                    @foreach($erreur['individu_erreur_tab'] as $individu) 
+                        <tr>
+                            <td>{{ $individu["codeApprenant"] }}</td>
+                            <td>{{ $individu["nomApprenant"] }}</td>
+                            <td>{{ $individu["prenomApprenant"] }}</td>
+                            <td>{{ $individu["nomFormation"] }}</td>
+                            <td>{{ $individu["nomAnnee"] }}</td>
+                            <td>{{ $individu["erreur"] }}</td>
+                        </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+
+            </div>
+            </div>
+        </div>
+        @endif
+
+
 
     </div>
 </div>

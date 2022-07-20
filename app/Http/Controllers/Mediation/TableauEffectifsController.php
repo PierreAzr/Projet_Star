@@ -22,6 +22,31 @@ class TableauEffectifsController extends Controller
 
     public function Effectifs(Request $request)
     {   
+        //cache::flush();
+
+        //1033599, 1033605, 1094842, 
+ 
+   /*      $api_data_prospects = Cache::get('api_prospects_tab_envoi');
+        $api_data_apprenants = $this->ApiApprenants(15);
+        //dd($api_data_apprenants[0]);
+         $codeApprenant = 920540;
+         
+        foreach ($api_data_apprenants as $apprenant) {          
+            if ($apprenant["codeApprenant"] == $codeApprenant) { 
+                echo("apprenant: $codeApprenant");   
+                dump($apprenant);   
+            }   
+        }
+        foreach ($api_data_prospects as $prospect) {
+            if ($prospect["codeApprenant"] ==  $codeApprenant ){  
+                echo('prospect');          
+                dump($prospect);
+            }
+        }   */
+        //exit;  
+
+        //ini_set('max_execution_time', 180);
+        //ini_set('memory_limit', '512M' );
 
 
         //On recupere la date s'il y en a une
@@ -330,7 +355,7 @@ class TableauEffectifsController extends Controller
                     //on prend l'inscription en cours
                     if ($apprenant["inscriptions"][$i]["isInscriptionEnCours"] == 1) {
                         $apprenants_tab[$apprenant["codeApprenant"]] = array(
-                            "CodeApprenant" =>$apprenant["codeApprenant"],
+                            "codeApprenant" =>$apprenant["codeApprenant"],
                             "nomApprenant" => $apprenant["nomApprenant"],
                             "prenomApprenant" => $apprenant["prenomApprenant"],
                             "nouveau" => $nouveau,
@@ -429,7 +454,7 @@ class TableauEffectifsController extends Controller
                 //Construction du tableau prsopects
                 //Attention certain prospect on plusieur formation souhaite on prend la premiere 
                 $prospects_tab[$prospect["codeApprenant"]] = array(
-                    "CodeApprenant" =>$prospect["codeApprenant"],
+                    "codeApprenant" =>$prospect["codeApprenant"],
                     "nomApprenant" => $prospect["nomApprenant"],
                     "prenomApprenant" => $prospect["prenomApprenant"],
                     "nomFormation" => $dernier_evenement_racine["formationsSouhaitees"][0]["nomFormation"],
@@ -593,8 +618,10 @@ class TableauEffectifsController extends Controller
         $liste_formation_existe_pas = [];
         foreach ($tableau_complet as $individu) {
 
+            $erreur = null;
             $mauvaise_annee = True;
             $formation_existe_pas = True;
+
             foreach ($formations as $formation) {
 
                 if($individu['nomFormation'] == $formation["nomFormation"] ){
@@ -609,21 +636,47 @@ class TableauEffectifsController extends Controller
 
             }
 
+            
             // liste des prospects/apprenants avec un mauvais nom d'année
             if ($mauvaise_annee) {
                 if(empty($individu["nomAnnee"])){
-                    array_push($liste_annee_null, $individu["CodeApprenant"]);                   
+
+                    array_push($liste_annee_null, $individu["codeApprenant"]); 
+                    $erreur = "L'année est vide";
+
                 }else{
-                    array_push($liste_annee_mauvaise, $individu["CodeApprenant"]);            
+
+                    array_push($liste_annee_mauvaise, $individu["codeApprenant"]);
+                    $erreur = "Nom année incorrect";
+ 
+
                 }
             }
+
+
 
             //liste des prospects/apprenants avec une formation qui n'est pas dans la basse
             if ($formation_existe_pas) {            
                 if ($individu["nomFormation"] !='ERASMUS POST-APPRENTISSAGE') {
-                    array_push($liste_formation_existe_pas, $individu["CodeApprenant"]);  
+
+                    array_push($liste_formation_existe_pas, $individu["codeApprenant"]); 
+                    $erreur = "La formation n'existe pas";
                 }       
             }
+
+            if(isset($erreur)){
+
+                $individu_erreur_tab[$individu["codeApprenant"]] = array(
+                    "codeApprenant" =>$individu["codeApprenant"],
+                    "nomApprenant" => $individu["nomApprenant"],
+                    "prenomApprenant" => $individu["prenomApprenant"],
+                    "nomFormation" => $individu["nomFormation"],
+                    "nomAnnee" => $individu["nomAnnee"],
+                    "erreur" => $erreur,
+                );
+
+            }
+
 
         }
         
@@ -631,6 +684,7 @@ class TableauEffectifsController extends Controller
             return array('liste_annee_mauvaise' => $liste_annee_mauvaise,
             'liste_annee_null' => $liste_annee_null,
             'liste_formation_existe_pas' => $liste_formation_existe_pas,
+            'individu_erreur_tab' => $individu_erreur_tab
             //'liste_fomation_erasmus' => $liste_fomation_erasmus,
             );
         }else {
