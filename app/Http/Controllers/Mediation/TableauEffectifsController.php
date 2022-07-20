@@ -677,9 +677,20 @@ class TableauEffectifsController extends Controller
 
             }
 
-
         }
         
+        //dump($individu_erreur_tab);
+        
+       // $individu_erreur_tab = array_map("unserialize", array_unique(array_map("serialize", $individu_erreur_tab)));
+        //$individu_erreur_tab = array_values($individu_erreur_tab);
+        //tri du trableau
+        $columns_1 = array_column($individu_erreur_tab, 'nomFormation');
+        $columns_2 = array_column($individu_erreur_tab, 'nomAnnee');
+        array_multisort($columns_1, SORT_ASC, $columns_2, SORT_ASC, $individu_erreur_tab);
+
+
+        //dd($individu_erreur_tab);
+
         if (!empty($liste_annee_mauvaise) && !empty($liste_annee_null)) {
             return array('liste_annee_mauvaise' => $liste_annee_mauvaise,
             'liste_annee_null' => $liste_annee_null,
