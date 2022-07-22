@@ -328,14 +328,14 @@
 
 <!-- Formation multiple, apprenants et prospects -->
 <div class="row">
-    <div class="accordion" id="accordionExample">
-        @if(!empty($prospects_plusieurs_formation))   
+    <div class="accordion" id="accordionExample">     
         <div class="accordion-item">
             <h2 class="accordion-header" id="headingOne">
             <button class="accordion-button collapsed fw-bold" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne" aria-expanded="false" aria-controls="collapseOne">
             Prospects avec plusieurs Formations ({{count($prospects_plusieurs_formation)}})
             </button>
             </h2>
+            @if(!empty($prospects_plusieurs_formation))
             <div id="collapseOne" class="accordion-collapse collapse" aria-labelledby="headingOne" data-bs-parent="#accordionExample">
             <div class="accordion-body">
                    
@@ -370,14 +370,14 @@
         </div>
         @endif 
 
-        @if(!empty($commun_tab))
+       
         <div class="accordion-item">
             <h2 class="accordion-header" id="headingThree">
             <button class="accordion-button collapsed fw-bold" type="button" data-bs-toggle="collapse" data-bs-target="#collapseThree" aria-expanded="false" aria-controls="collapseThree">
-                Apprenant et Prospect à la fois ({{count($commun_tab)}})
-                
+                Apprenant et Prospect à la fois ({{count($commun_tab)}})                
             </button>
             </h2>
+            @if(!empty($commun_tab))
             <div id="collapseThree" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#accordionExample">
             <div class="accordion-body">
                 
@@ -413,12 +413,12 @@
         @if(!empty($erreur))
         <div id="erreur" class="accordion-item">
             <h2 class="accordion-header" id="headingFour">
-            <button class="accordion-button collapsed fw-bold" type="button" data-bs-toggle="collapse" data-bs-target="#collapseFour" aria-expanded="false" aria-controls="collapseFour">
+            <button class="accordion-button bg-danger text-white fw-bold" type="button" data-bs-toggle="collapse" data-bs-target="#collapseFour" aria-expanded="false" aria-controls="collapseFour">
                 Erreur Details ({{count($erreur['individu_erreur_tab'])}})
                 
             </button>
             </h2>
-            <div id="collapseFour" class="accordion-collapse collapse" aria-labelledby="headingFour" data-bs-parent="#accordionExample">
+            <div id="collapseFour" class="accordion-collapse collapse show" aria-labelledby="headingFour" data-bs-parent="#accordionExample">
             <div class="accordion-body">
                 
             <table class="table">
