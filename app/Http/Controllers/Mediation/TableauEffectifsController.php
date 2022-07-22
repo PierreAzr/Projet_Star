@@ -21,13 +21,22 @@ class TableauEffectifsController extends Controller
     
     use ApiRequestTrait;
 
+    /**
+     * Fonction Principal du controller
+     * a besoin des fonction ApprenantsTab, ProspectsTab, ConstructionTableauFinal, Erreur
+     * une requetes a l'API Ypareo sont faite depuis ApiRequestTrait
+     * deux requetes a la base de donnee (table formation et previs)
+     *
+     * @return resources\views\mediation\tableaueffectifs.blade.php;
+     */
     public function Effectifs(Request $request)
     {   
         //cache::flush();
 
         //1033599, 1033605, 1094842, 
  
-   /*      $api_data_prospects = Cache::get('api_prospects_tab_envoi');
+        /*      
+        $api_data_prospects = Cache::get('api_prospects_tab_envoi');
         $api_data_apprenants = $this->ApiApprenants(15);
         //dd($api_data_apprenants[0]);
          $codeApprenant = 920540;
@@ -97,9 +106,9 @@ class TableauEffectifsController extends Controller
             ->with('flash_type', 'alert-danger');
         }
 
-
+/* 
         //Si la date_choisi est la date du jour on recupere le cache
-        //$date_cache = null;
+        $date_cache = null;
         if(!empty($date_cache)){
             echo("datevide");
             $tableau_complet = Cache::get('tableau_complet_date_cache');
@@ -124,7 +133,7 @@ class TableauEffectifsController extends Controller
                 ->with(compact('commun_tab'));
             }
 
-        }
+        } */
 
 
         //on recupere la table des apprenants 
@@ -189,7 +198,7 @@ class TableauEffectifsController extends Controller
         $erreur = $this->Erreur($tableau_complet, $formations);
         //$erreur=null;
 
-        // mise en cache dans le cas ou la date est aujourd'hui
+/*         // mise en cache dans le cas ou la date est aujourd'hui
         if(isset($date_cache)){
             
             Cache::put('final_tab_date_cache', $final_tab, env('TEMP_CACHE_CONTROLLER'));
@@ -201,7 +210,7 @@ class TableauEffectifsController extends Controller
             Cache::put('previ_date_cache', $previs, env('TEMP_CACHE_CONTROLLER'));
             
 
-        }
+        } */
         
         return view('mediation.tableaueffectifs')
                 ->with(compact('final_tab'))
@@ -216,67 +225,88 @@ class TableauEffectifsController extends Controller
 
     }
 
+
+    /**
+     * Creer la table Apprenants en fonction de la date choisi
+     * Six requetes a l'API Ypareo sont faite depuis ApiRequestTrait
+     *
+     * @return array apprenants_tab;
+     */
     public function ApprenantsTab($date_choisi,$code_periode_actuel,$code_periode_precedente)
     {
 
-        //##requete api
-        $api_data_frequentes = $this->ApiFrequentes($code_periode_actuel);
+        $code_periode_actuel_cache = Cache::get('code_periode_actuel_cache');
+        
+        if($code_periode_actuel == $code_periode_actuel_cache){
+            
+            $api_data_frequentes = Cache::get('api_data_frequentes_periode_cache');
+            $api_data_contrats = Cache::get('api_data_contrats_periode_cache');
+            $api_data_apprenants = Cache::get('api_data_apprenants_periode_cache');
 
-        //creation de la table frequentation
-        $frequente_tab=[];
-        foreach ($api_data_frequentes as $frequente) {
+            $frequente_tab_precedent = Cache::get('frequente_tab_precedent_periode_cache');
+            $apprenants_tab_precedent = Cache::get('apprenants_tab_precedent_periode_cache');
+            $groupe_tab = Cache::get('groupe_tab_periode_cache');
 
-            // on verifie que la date
-            $date_fin = date_create_from_format('d/m/Y', $frequente["dateFin"]);
-            $date_deb = date_create_from_format('d/m/Y', $frequente["dateDeb"]);
-            if( (empty($frequente["dateFin"]) || $date_choisi < $date_fin) && ($date_choisi > $date_deb)) {
-                            
-                $frequente_tab[$frequente["codeApprenant"]] = array(
-                    "codeApprenant" => $frequente["codeApprenant"],
-                    "codeGroupe" => $frequente["codeGroupe"],
-                );
+        }else{
 
+            //##requete api
+            $api_data_frequentes = $this->ApiFrequentes($code_periode_actuel);
+            Cache::put('api_data_frequentes_periode_cache', $api_data_frequentes , env('TEMP_CACHE_CONTROLLER'));
+
+            //## requete api
+            $api_data_contrats = $this->ApiContrats($code_periode_actuel);     
+            Cache::put('api_data_contrats_periode_cache', $api_data_contrats , env('TEMP_CACHE_CONTROLLER'));
+
+            //## requete api
+            $api_data_apprenants = $this->ApiApprenants($code_periode_actuel);
+            Cache::put('api_data_apprenants_periode_cache', $api_data_apprenants , env('TEMP_CACHE_CONTROLLER'));
+                    
+            //## requete api
+            $api_data_frequentes_precedent = $this->ApiFrequentes($code_periode_precedente);
+            // Construction de la table de fraquantation de l'année precedente
+            foreach ($api_data_frequentes_precedent as $frequente) { 
+                $frequente_tab_precedent[$frequente["codeApprenant"]] = $frequente["codeApprenant"]; 
             }
-        }
-                
-        //## requete api
-        $api_data_frequentes_precedent = $this->ApiFrequentes($code_periode_precedente);        
-        
-        // Construction de la table de fraquantation de l'année precedente
-        foreach ($api_data_frequentes_precedent as $frequente) {
-               
-            $frequente_tab_precedent[$frequente["codeApprenant"]] = $frequente["codeApprenant"];
-        
-        } 
+            Cache::put('frequente_tab_precedent_periode_cache', $frequente_tab_precedent , env('TEMP_CACHE_CONTROLLER'));
 
-       //## requete api
-        $api_data_apprenants_precedent = $this->ApiApprenants($code_periode_precedente); 
+            //##requete api
+            $api_data_groupes = $this->ApiGroupes($code_periode_actuel);
+            foreach ($api_data_groupes as $groupe) {
+                $groupe_tab[$groupe["codeGroupe"]] = $groupe["nomGroupe"];
+            }
+            Cache::put('groupe_tab_periode_cache', $groupe_tab , env('TEMP_CACHE_CONTROLLER'));
+                  
+            //## requete api
+            $api_data_apprenants_precedent = $this->ApiApprenants($code_periode_precedente); 
 
-        // Construction de la table apprenants precendent contenant les apprenants 
-        // ayant frequante l'etablisement l'annee precedente et le nom de la formation 
-        foreach ($api_data_apprenants_precedent as $apprenant) {  
+            // Construction de la table apprenants precendent contenant les apprenants 
+            // ayant frequante l'etablisement l'annee precedente et le nom de la formation 
+            foreach ($api_data_apprenants_precedent as $apprenant) {  
 
-            // on verifie que l'apprenant a bien frequante l'etablisement l'annee precedente
-            if (!empty($frequente_tab_precedent[$apprenant["codeApprenant"]])) {
+                // on verifie que l'apprenant a bien frequante l'etablisement l'annee precedente
+                if (!empty($frequente_tab_precedent[$apprenant["codeApprenant"]])) {
 
-                //on parcourt ces inscriptions
-                for ($i=0; $i < count($apprenant["inscriptions"]) ; $i++) { 
-                    //on prend l'inscription en cours / correspond bien a l'inscription en cours lors de la periode choisi
-                    if ($apprenant["inscriptions"][$i]["isInscriptionEnCours"] == 1) {
-                        // table apprenants precendent contenant les apprenants et le nom de la formation
-                        $apprenants_tab_precedent[$apprenant["codeApprenant"]] = $apprenant["inscriptions"][$i]["formation"]["nomFormation"];
+                    //on parcourt ces inscriptions
+                    for ($i=0; $i < count($apprenant["inscriptions"]) ; $i++) { 
+                        //on prend l'inscription en cours / correspond bien a l'inscription en cours lors de la periode choisi
+                        if ($apprenant["inscriptions"][$i]["isInscriptionEnCours"] == 1) {
+                            // table apprenants precendent contenant les apprenants et le nom de la formation
+                            $apprenants_tab_precedent[$apprenant["codeApprenant"]] = $apprenant["inscriptions"][$i]["formation"]["nomFormation"];
 
+                        }
                     }
+                    
                 }
-                
+                            
             }
-                        
-        }
-          
-        //## requete api
-        $api_data_contrats = $this->ApiContrats($code_periode_actuel);     
+            Cache::put('apprenants_tab_precedent_periode_cache', $apprenants_tab_precedent , env('TEMP_CACHE_CONTROLLER'));
+            
+            Cache::put('code_periode_actuel_cache', $code_periode_actuel , env('TEMP_CACHE_CONTROLLER'));
+
+        }//Fin test cache periode
 
         // Creation de la table contrat depuis la requete api
+        //depand de la date choisi
         foreach ($api_data_contrats as $contrat) {
 
             $date_fin = date_create_from_format('d/m/Y', $contrat["dateFinContrat"] ) ;
@@ -285,7 +315,7 @@ class TableauEffectifsController extends Controller
             // on garde les contrats qui non pas de date de resiliation et qui sont relier a une entreprise
             // les contrats qui nom pas d'entreprise corresponde a un contrat intermedaire suite a une rupture en attandant que l'apprenant trouve une nouvel entreprise
             if (empty($contrat["dateResiliation"]) && !empty($contrat["codeEntreprise"])) {
-      
+    
                 if ($date_fin > $date_choisi) {
 
                     $contrats_tab[$contrat["codeApprenant"]] = array(
@@ -306,7 +336,7 @@ class TableauEffectifsController extends Controller
         if (empty($entreprises_tab)) {
 
             //## requete api
-            $api_data_entreprises = $this->ApiEntreprises();
+            $api_data_entreprises = $this->ApiEntreprises();  
 
             // Tableau avec code entreprise en clef et le nom en valeur 
             foreach ($api_data_entreprises as $entreprise) {
@@ -316,14 +346,24 @@ class TableauEffectifsController extends Controller
             Cache::put('entreprises_tab', $entreprises_tab, env('TEMP_CACHE_CONTROLLER'));
         }
 
+        //creation de la table frequentation
+        //depand de la date choisi
+        $frequente_tab=[];
+        foreach ($api_data_frequentes as $frequente) {
 
-        $api_data_groupes = $this->ApiGroupes($code_periode_actuel);
-        foreach ($api_data_groupes as $groupe) {
-            $groupe_tab[$groupe["codeGroupe"]] = $groupe["nomGroupe"];
+            // on verifie que la date
+            $date_fin = date_create_from_format('d/m/Y', $frequente["dateFin"]);
+            $date_deb = date_create_from_format('d/m/Y', $frequente["dateDeb"]);
+            if( (empty($frequente["dateFin"]) || $date_choisi < $date_fin) && ($date_choisi > $date_deb)) {
+                            
+                $frequente_tab[$frequente["codeApprenant"]] = array(
+                    "codeApprenant" => $frequente["codeApprenant"],
+                    "codeGroupe" => $frequente["codeGroupe"],
+                );
+
+            }
         }
 
-        //## requete api
-        $api_data_apprenants = $this->ApiApprenants($code_periode_actuel);
 
         // tableau apprenant complete 
         $apprenants_tab = [];
@@ -332,7 +372,7 @@ class TableauEffectifsController extends Controller
             //si l'apprenant et dans la table de frequentation
             if (!empty($frequente_tab[$apprenant["codeApprenant"]])) {     
                 
-                //tout apprenant et nouveau sauf s'il est dans la table apprenants_tab_precedent et que son nom de formation est le meme
+                //tous apprenants et nouveau sauf s'il est dans la table apprenants_tab_precedent et que son nom de formation est le meme
                 $nouveau = 1;
                 if (!empty($apprenants_tab_precedent[$apprenant["codeApprenant"]])) {
  
@@ -347,6 +387,8 @@ class TableauEffectifsController extends Controller
                 for ($i=0; $i < count($apprenant["inscriptions"]) ; $i++) { 
                     //on prend l'inscription en cours
                     if ($apprenant["inscriptions"][$i]["isInscriptionEnCours"] == 1) {
+
+                        //On recupere les informations souhaiter
                         $apprenants_tab[$apprenant["codeApprenant"]] = array(
                             "codeApprenant" =>$apprenant["codeApprenant"],
                             "nomApprenant" => $apprenant["nomApprenant"],
@@ -364,16 +406,23 @@ class TableauEffectifsController extends Controller
                 if (!empty($contrats_tab[$apprenant["codeApprenant"]])) {
                 
                     $code_entreprise = $contrats_tab[$apprenant["codeApprenant"]]["codeEntreprise"];
+                    if (!empty($entreprises_tab[ $code_entreprise ])) {  
+                        
+                        $apprenants_tab[$apprenant["codeApprenant"]] += array(
+                            "dateDebContrat" => $contrats_tab[$apprenant["codeApprenant"]]["dateDebContrat"],
+                            "nomEntreprise" => $entreprises_tab[ $code_entreprise ]
+    
+                        );
+    
+                    }
 
-                    $apprenants_tab[$apprenant["codeApprenant"]] += array(
-                        "dateDebContrat" => $contrats_tab[$apprenant["codeApprenant"]]["dateDebContrat"],
-                        "nomEntreprise" => $entreprises_tab[ $code_entreprise ]
-                        //"nomEntreprise" => $entreprises_tab[ $contrat[$apprenant["codeApprenant"]]["codeEntreprise"] ]["nomEntreprise"]
-                    );
 
                 }
+
+                //On rajoute sont nom de groupe
                 $codeGroupe = $frequente_tab[$apprenant["codeApprenant"]]["codeGroupe"];
-                if (!empty($groupe_tab[$codeGroupe])) {      
+                if (!empty($groupe_tab[$codeGroupe])) {  
+                        
                     $apprenants_tab[$apprenant["codeApprenant"]] += array(
                         "nomGroupe" => $groupe_tab[$codeGroupe],
                     );
@@ -473,7 +522,7 @@ class TableauEffectifsController extends Controller
     /**
      * Creer le tableau final souhaiter en comptant pour chaque formations 
      * les individus dans les colonnes souhaiter
-     * Ainsi que la sommes pour chaque colonne
+     * Ainsi que la sommes pour chaque colonnes
      *
      * @return array("final_tab" => $final_tab, "total_tab" => $total_tab )
      */
@@ -566,35 +615,6 @@ class TableauEffectifsController extends Controller
         return array("final_tab" => $final_tab, "total_tab" => $total_tab );
     }
 
-    /**
-     * Enregistre les previsualisations dans la base de donnee selon la periode 
-     *
-     * @return route('mediation_tableau_effectifs', ['date' => $date])
-     */
-    public function PrevisDataBase(Request $request)
-    {
-        
-        $periode = $request->get('periode');
-        $date = $request->get('date');
-
-        foreach ($request->input() as $key => $value) {
-            if (is_int($key)) {      
-                if(is_numeric($value)) {      
-                    Previs::updateOrCreate(
-                        ['idFormation' => $key, 'periode' => $periode],
-                        ['previ' => $value ]
-                    );
-                }else {
-                    return redirect()->route('mediation_tableau_effectifs', ['date' => $date])->with('flash_message', 'Erreur les champs doivent être des nombres')
-                    ->with('flash_type', 'alert-danger');
-                }
-            }
-        }
-
-       return redirect()->route('mediation_tableau_effectifs', ['date' => $date])->with('flash_message', 'Previsionel enregitrer')
-                                                    ->with('flash_type', 'alert-success');
-
-    }
 
     /**
      * Creer un tableau contenant les individus qui sont pas dans le tableau final
@@ -691,5 +711,34 @@ class TableauEffectifsController extends Controller
 
     }
 
+    /**
+     * Enregistre les previsualisations dans la base de donnee selon la periode 
+     *
+     * @return route('mediation_tableau_effectifs', ['date' => $date])
+     */
+    public function PrevisDataBase(Request $request)
+    {
+        
+        $periode = $request->get('periode');
+        $date = $request->get('date');
+
+        foreach ($request->input() as $key => $value) {
+            if (is_int($key)) {      
+                if(is_numeric($value)) {      
+                    Previs::updateOrCreate(
+                        ['idFormation' => $key, 'periode' => $periode],
+                        ['previ' => $value ]
+                    );
+                }else {
+                    return redirect()->route('mediation_tableau_effectifs', ['date' => $date])->with('flash_message', 'Erreur les champs doivent être des nombres')
+                    ->with('flash_type', 'alert-danger');
+                }
+            }
+        }
+
+       return redirect()->route('mediation_tableau_effectifs', ['date' => $date])->with('flash_message', 'Previsionel enregitrer')
+                                                    ->with('flash_type', 'alert-success');
+
+    }
 
 }//fin class
