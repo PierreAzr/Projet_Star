@@ -31,32 +31,7 @@ class TableauEffectifsController extends Controller
      */
     public function Effectifs(Request $request)
     {   
-        //cache::flush();
-
-        //1033599, 1033605, 1094842, 
- 
-        /*      
-        $api_data_prospects = Cache::get('api_prospects_tab_envoi');
-        $api_data_apprenants = $this->ApiApprenants(15);
-        //dd($api_data_apprenants[0]);
-         $codeApprenant = 920540;
-         
-        foreach ($api_data_apprenants as $apprenant) {          
-            if ($apprenant["codeApprenant"] == $codeApprenant) { 
-                echo("apprenant: $codeApprenant");   
-                dump($apprenant);   
-            }   
-        }
-        foreach ($api_data_prospects as $prospect) {
-            if ($prospect["codeApprenant"] ==  $codeApprenant ){  
-                echo('prospect');          
-                dump($prospect);
-            }
-        }   */
-        //exit;  
-
-        ini_set('max_execution_time', 180);
-        ini_set('memory_limit', '512M' );
+   
 
 
         //On recupere la date s'il y en a une
